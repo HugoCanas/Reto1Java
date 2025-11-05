@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Color;
+import javax.swing.UIManager;
 
 public class Bingo extends JFrame {
 
@@ -126,6 +127,7 @@ public class Bingo extends JFrame {
 		contentPane.add(btn17);
 
 		btn12 = new JButton("New button");
+		btn12.setForeground(new Color(0, 0, 0));
 		btn12.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn12.setBounds(151, 232, 112, 78);
 		contentPane.add(btn12);
@@ -161,6 +163,7 @@ public class Bingo extends JFrame {
 		contentPane.add(btn8);
 
 		btn7 = new JButton("New button");
+		btn7.setForeground(new Color(0, 0, 0));
 		btn7.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn7.setBounds(151, 154, 112, 78);
 		contentPane.add(btn7);
@@ -217,6 +220,8 @@ public class Bingo extends JFrame {
 		asignarNumerosABotones();
 		
 		estadoBotones(estado);
+		
+		clickBoton();
 		
 	}
 
@@ -297,7 +302,7 @@ public class Bingo extends JFrame {
 	public void interaccionBoton(JButton boton) {
 
 		boton.addActionListener(null);
-
+		
 	}
 
 	public void clickBoton() {
@@ -311,11 +316,10 @@ public class Bingo extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
 
-
 					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
-
-
-					interaccionBoton(boton);
+	                boton.setBackground(new java.awt.Color(150,33,33));
+	                UIManager.put("Button.disabledText", Color.WHITE);;
+	                boton.setEnabled(false);
 
 				}
 			});	
