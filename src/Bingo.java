@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Color;
 
 public class Bingo extends JFrame {
 
@@ -39,13 +40,15 @@ public class Bingo extends JFrame {
 	private JButton btn24;
 	private JButton btn25;
 	private JButton[] arrayBotones;
+	private int[] arrayNumeros;
 	private boolean estado=true;
+
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -59,6 +62,7 @@ public class Bingo extends JFrame {
 	}
 
 	public Bingo() {
+		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 950, 540);
 		contentPane = new JPanel();
@@ -67,121 +71,191 @@ public class Bingo extends JFrame {
 		contentPane.setLayout(null);
 
 		btn22 = new JButton("New button");
+		btn22.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn22.setBounds(151, 387, 112, 78);
 		contentPane.add(btn22);
 
 		btn23 = new JButton("New button");
+		btn23.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn23.setBounds(263, 387, 112, 78);
 		contentPane.add(btn23);
 
 		btn24 = new JButton("New button");
+		btn24.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn24.setBounds(376, 387, 112, 78);
 		contentPane.add(btn24);
 
 		btn25 = new JButton("New button");
+		btn25.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn25.setBounds(490, 387, 112, 78);
 		contentPane.add(btn25);
 
 		btn20 = new JButton("New button");
+		btn20.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn20.setBounds(490, 309, 112, 78);
 		contentPane.add(btn20);
 
 		btn15 = new JButton("New button");
+		btn15.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn15.setBounds(490, 232, 112, 78);
 		contentPane.add(btn15);
 
 		btn10 = new JButton("New button");
+		btn10.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn10.setBounds(490, 154, 112, 78);
 		contentPane.add(btn10);
 
 		btn5 = new JButton("New button");
+		btn5.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn5.setBounds(490, 75, 112, 78);
 		contentPane.add(btn5);
 
 		btn19 = new JButton("New button");
+		btn19.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn19.setBounds(376, 309, 112, 78);
 		contentPane.add(btn19);
 
 		btn18 = new JButton("New button");
+		btn18.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn18.setBounds(263, 309, 112, 78);
 		contentPane.add(btn18);
 
 		btn17 = new JButton("New button");
+		btn17.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn17.setBounds(151, 309, 112, 78);
 		contentPane.add(btn17);
 
 		btn12 = new JButton("New button");
+		btn12.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn12.setBounds(151, 232, 112, 78);
 		contentPane.add(btn12);
 
 		btn13 = new JButton("New button");
+		btn13.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn13.setBounds(263, 232, 112, 78);
 		contentPane.add(btn13);
 
 		btn14 = new JButton("New button");
+		btn14.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn14.setBounds(376, 232, 112, 78);
 		contentPane.add(btn14);
 
 		btn9 = new JButton("New button");
+		btn9.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn9.setBounds(376, 154, 112, 78);
 		contentPane.add(btn9);
 
 		btn4 = new JButton("New button");
+		btn4.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn4.setBounds(376, 75, 112, 78);
 		contentPane.add(btn4);
 
 		btn3 = new JButton("New button");
+		btn3.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn3.setBounds(263, 75, 112, 78);
 		contentPane.add(btn3);
 
 		btn8 = new JButton("New button");
+		btn8.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn8.setBounds(263, 154, 112, 78);
 		contentPane.add(btn8);
 
 		btn7 = new JButton("New button");
+		btn7.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn7.setBounds(151, 154, 112, 78);
 		contentPane.add(btn7);
 
 		btn2 = new JButton("New button");
+		btn2.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn2.setBounds(151, 75, 112, 78);
 		contentPane.add(btn2);
 
 		btn21 = new JButton("New button");
+		btn21.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn21.setBounds(39, 387, 112, 78);
 		contentPane.add(btn21);
 
 		btn16 = new JButton("New button");
+		btn16.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn16.setBounds(39, 309, 112, 78);
 		contentPane.add(btn16);
 
 		btn11 = new JButton("New button");
+		btn11.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn11.setBounds(39, 232, 112, 78);
 		contentPane.add(btn11);
 
 		btn6 = new JButton("New button");
+		btn6.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn6.setBounds(39, 154, 112, 78);
 		contentPane.add(btn6);
 
 		btn1 = new JButton("New button");
+		btn1.setFont(new Font("Tahoma", Font.BOLD, 20));
 		btn1.setBounds(39, 75, 112, 78);
 		contentPane.add(btn1);
 
 		JLabel lblNewLabel = new JLabel("67");
 		lblNewLabel.setFont(new Font("Verdana", Font.BOLD, 75));
-		lblNewLabel.setBounds(753, 154, 120, 104);
+		lblNewLabel.setBounds(734, 197, 120, 104);
 		contentPane.add(lblNewLabel);
 
+		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
+		lblNewLabel_1.setForeground(new Color(0, 0, 0));
+		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
+		lblNewLabel_1.setBounds(308, 1, 311, 63);
+		contentPane.add(lblNewLabel_1);
+
 		arrayBotones = new JButton [25];
+
+		arrayNumeros = new int [25];
+
+		llenarArrayNumeros(arrayNumeros);
+
+		llenarArrayBotones(arrayBotones);
 		
-		llenarArray(arrayBotones);
-		
+		asignarNumerosABotones();
 		
 		estadoBotones(estado);
+		
+	}
+
+	private void llenarArrayNumeros(int[] arrayNumeros2) {
+		int num;
+		boolean repetido;
+
+		for(int i=0; i<arrayNumeros2.length;i++) {
+			
+			do {
+				num = (int)(Math.random() * 90) + 1; 
+				repetido = false;
+
+				for(int j=0; j<i;j++) {
+					if(arrayNumeros2[j] == num) {
+						repetido = true;
+					}
+				}
+
+			} while(repetido==true); //se repite todo el procedimiento hasta que repetido no sea false
+
+			arrayNumeros2[i] = num; //se introduce aqui el numero al assay
+			
+		}
 	}
 	
-	private void llenarArray(JButton[] arrayBotones2) {
+	private void asignarNumerosABotones() {
+	    for(int i = 0; i < arrayBotones.length; i++) {
+	        arrayBotones[i].setText(String.valueOf(arrayNumeros[i]));
+	    }
+	}
+	
+
+	private void llenarArrayBotones(JButton[] arrayBotones2) {
 		// TODO Auto-generated method stub
 		//FUNCION QUE LLENA EL ARRAY DE BOTONES
+
+		//(QUIZAS UN FOR PORQUE SINO IGUAL NO MUY OPTIMIZADO)
+
 		arrayBotones2[0]= btn1;
 		arrayBotones2[1]= btn2;
 		arrayBotones2[2]= btn3;
@@ -207,22 +281,26 @@ public class Bingo extends JFrame {
 		arrayBotones2[22]= btn23;
 		arrayBotones2[23]= btn24;
 		arrayBotones2[24]= btn25;
+
 	}
+
 	
+
 	private void estadoBotones(boolean estado) {
 
 		for(int i=0;i<arrayBotones.length;i++) {
 			arrayBotones[i].setEnabled(estado);
 		}
+
 	}
 
 	public void interaccionBoton(JButton boton) {
-		
+
 		boton.addActionListener(null);
-		
+
 	}
 
-	public void generarNumeros() {
+	public void clickBoton() {
 		/*ARRAY DE BOTONES*/
 
 		for(JButton boton : arrayBotones ){ //For Each
@@ -233,19 +311,26 @@ public class Bingo extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
 
-					
-					
-					
-					/*Hacer funcion para todos los botones y llamarla aqui*/
+
+					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
+
 
 					interaccionBoton(boton);
-					
-					
-					
+
 				}
-			});
-
+			});	
 		}
-
 	}
+
+
+	/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
+	 * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE
+	 *  NO SE PUEDA INTERRUMPIR EL FLUJO DE LA PREGUNTA CON QUE ALGUIEN HA GANADO.
+	 *  
+	 *  ADEMAS, SI DOS PERSONAS A LA VEZ HACEN LINEA O BINGO, HACER QUE A LOS DOS SE LES MUESTRE LA PREGUNTA PERO QUE SOLO UNO DE ELLOS PUEDA CONSEGUIR LA LINEA, ES DECIR,
+	 *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
+	 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
+	 *  
+	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE.
+	 */
 }
