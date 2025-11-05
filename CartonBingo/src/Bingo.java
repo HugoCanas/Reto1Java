@@ -60,9 +60,11 @@ public class Bingo extends JFrame {
 				}
 			}
 		});
+		
 	}
 
 	public Bingo() {
+		
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 950, 540);
@@ -226,6 +228,9 @@ public class Bingo extends JFrame {
 	}
 
 	private void llenarArrayNumeros(int[] arrayNumeros2) {
+		
+		//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
+		
 		int num;
 		boolean repetido;
 
@@ -249,17 +254,20 @@ public class Bingo extends JFrame {
 	}
 	
 	private void asignarNumerosABotones() {
+		
+		//FUNCION QUE ASIGNA LOS NUMEROS DEL ARRAY DE NUMEROS A LOS BOTONES
+		
 	    for(int i = 0; i < arrayBotones.length; i++) {
 	        arrayBotones[i].setText(String.valueOf(arrayNumeros[i]));
 	    }
+	    
 	}
 	
 
 	private void llenarArrayBotones(JButton[] arrayBotones2) {
 		// TODO Auto-generated method stub
+		
 		//FUNCION QUE LLENA EL ARRAY DE BOTONES
-
-		//(QUIZAS UN FOR PORQUE SINO IGUAL NO MUY OPTIMIZADO)
 
 		arrayBotones2[0]= btn1;
 		arrayBotones2[1]= btn2;
@@ -299,28 +307,22 @@ public class Bingo extends JFrame {
 
 	}
 
-	public void interaccionBoton(JButton boton) {
-
-		boton.addActionListener(null);
-		
-	}
-
 	public void clickBoton() {
 		/*ARRAY DE BOTONES*/
-
+		
 		for(JButton boton : arrayBotones ){ //For Each
-
+			
 			boton.addActionListener(new ActionListener() {
-
+				
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
-
+					
 					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
 	                boton.setBackground(new java.awt.Color(150,33,33));
 	                UIManager.put("Button.disabledText", Color.WHITE);;
 	                boton.setEnabled(false);
-
+	                
 				}
 			});	
 		}
@@ -335,6 +337,6 @@ public class Bingo extends JFrame {
 	 *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
 	 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
 	 *  
-	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE.
+	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
 	 */
 }
