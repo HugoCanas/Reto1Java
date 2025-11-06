@@ -14,6 +14,9 @@ import javax.swing.UIManager;
 public class Bingo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	public static final int NO_FIN = 0;
+	public static final int LINEA = 1;
+	public static final int BINGO = 2;
 	private JPanel contentPane;
 	private JButton btn1;
 	private JButton btn2;
@@ -43,6 +46,7 @@ public class Bingo extends JFrame {
 	private JButton[] arrayBotones;
 	private int[] arrayNumeros;
 	private boolean estado=true;
+	private boolean lineaEncontrada=false;
 
 
 	/**
@@ -60,11 +64,11 @@ public class Bingo extends JFrame {
 				}
 			}
 		});
-		
+
 	}
 
 	public Bingo() {
-		
+
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 950, 540);
@@ -218,24 +222,25 @@ public class Bingo extends JFrame {
 		llenarArrayNumeros(arrayNumeros);
 
 		llenarArrayBotones(arrayBotones);
-		
+
 		asignarNumerosABotones();
-		
+
 		estadoBotones(estado);
-		
+
 		clickBoton();
-		
+
+
 	}
 
 	private void llenarArrayNumeros(int[] arrayNumeros2) {
-		
+
 		//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
-		
+
 		int num;
 		boolean repetido;
 
 		for(int i=0; i<arrayNumeros2.length;i++) {
-			
+
 			do {
 				num = (int)(Math.random() * 90) + 1; 
 				repetido = false;
@@ -249,24 +254,24 @@ public class Bingo extends JFrame {
 			} while(repetido==true); //se repite todo el procedimiento hasta que repetido no sea false
 
 			arrayNumeros2[i] = num; //se introduce aqui el numero al assay
-			
+
 		}
 	}
-	
+
 	private void asignarNumerosABotones() {
-		
+
 		//FUNCION QUE ASIGNA LOS NUMEROS DEL ARRAY DE NUMEROS A LOS BOTONES
-		
-	    for(int i = 0; i < arrayBotones.length; i++) {
-	        arrayBotones[i].setText(String.valueOf(arrayNumeros[i]));
-	    }
-	    
+
+		for(int i = 0; i < arrayBotones.length; i++) {
+			arrayBotones[i].setText(String.valueOf(arrayNumeros[i]));
+		}
+
 	}
-	
+
 
 	private void llenarArrayBotones(JButton[] arrayBotones2) {
 		// TODO Auto-generated method stub
-		
+
 		//FUNCION QUE LLENA EL ARRAY DE BOTONES
 
 		arrayBotones2[0]= btn1;
@@ -297,7 +302,7 @@ public class Bingo extends JFrame {
 
 	}
 
-	
+
 
 	private void estadoBotones(boolean estado) {
 
@@ -309,23 +314,69 @@ public class Bingo extends JFrame {
 
 	public void clickBoton() {
 		/*ARRAY DE BOTONES*/
-		
+
 		for(JButton boton : arrayBotones ){ //For Each
-			
+
 			boton.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
-					
+
 					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
-	                boton.setBackground(new java.awt.Color(150,33,33));
-	                UIManager.put("Button.disabledText", Color.WHITE);;
-	                boton.setEnabled(false);
-	                
+					boton.setBackground(new java.awt.Color(150,33,33));
+					UIManager.put("Button.disabledText", Color.WHITE);;
+					boton.setEnabled(false);
+
+					comprobacionBingo();
+
+					if (lineaEncontrada==false) {
+						comprobacionLinea();
+					}
+					
 				}
 			});	
 		}
+	}
+
+
+
+	//BINGO
+	public int comprobacionBingo() {
+
+		// 1º: COMPROBAR SI HAY BINGO COMPLETO (todos los botones deshabilitados)
+		int activadas = 0;
+
+		for(int i = 0; i < arrayBotones.length; i++) {
+			if(arrayBotones[i].isEnabled()) {
+				activadas++;
+			}
+		}
+
+		if(activadas == 0) {
+			System.out.println("¡BINGO!");
+			return BINGO;
+		}
+		return NO_FIN;
+	}
+
+	public int comprobacionLinea() {
+
+		//LINEA
+
+		for(int fila = 0; fila < 5; fila++) {
+			if(!arrayBotones[fila*5+0].isEnabled() && 
+					!arrayBotones[fila*5+1].isEnabled() && 
+					!arrayBotones[fila*5+2].isEnabled() && 
+					!arrayBotones[fila*5+3].isEnabled() && 
+					!arrayBotones[fila*5+4].isEnabled()) {
+				System.out.println("¡LÍNEA!");
+				lineaEncontrada=true;
+				return LINEA;
+			}
+		}
+
+		return NO_FIN;
 	}
 
 
@@ -338,5 +389,9 @@ public class Bingo extends JFrame {
 	 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
 	 *  
 	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
+	 */
+
+	/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
+	 * 
 	 */
 }
