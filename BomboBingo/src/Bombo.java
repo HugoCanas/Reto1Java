@@ -7,6 +7,10 @@ import java.awt.Panel;
 import java.awt.GridLayout;
 import java.awt.Button;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import java.awt.Color;
@@ -28,7 +32,7 @@ public class Bombo extends JFrame {
 	private JLabel nuevoNumlabel;
 	private JLabel antNumlabel;
 	private int cont=0;
-
+	
 	/**
 	 * Launch the application.
 	 */
@@ -149,7 +153,6 @@ public class Bombo extends JFrame {
 		});
 	}
 	
-	//generar el numero nuevo que no este repetido
 	public void nuevoNumero(int[] arrayNumeros2) {
 		int num;
 		boolean repetido;
@@ -164,14 +167,15 @@ public class Bombo extends JFrame {
 					}
 				}
 
-			} while(repetido==true); //se repite todo el procedimiento hasta que repetido no sea false
+			} while(repetido==true);
 			
-			arrayNumeros2[cont] = num; //se introduce aqui el numero al assay
+			arrayNumeros2[cont] = num;
 			System.out.print(arrayNumeros2[cont] + " ");
 			nuevoNumlabel.setText(Integer.toString(num));
 			botones[num-1].setEnabled(false);
 			numeroAnterior();
 			cont++;
+			guardarNumero();
 			
 		}
 	
@@ -180,6 +184,33 @@ public class Bombo extends JFrame {
 			if(cont > 0) {
 				antNumlabel.setText(Integer.toString(arrayNumeros[cont-1]));
 			}
+		}
+		
+		public void guardarNumero() {
+
+			String rutaArchivo = new File("bombo_bingo.txt").getAbsolutePath();
+
+		    try (PrintWriter pw = new PrintWriter(new File(rutaArchivo))) {
+		        // Primera línea: número actual (el último que salió)
+		        if (cont > 0) {
+		            pw.println(arrayNumeros[cont - 1]);
+		        } else {
+		            pw.println("0");
+		        }
+
+		        // Segunda línea: todos los números que han salido (separados por comas)
+		        for (int i = 0; i < cont; i++) {
+		            pw.print(arrayNumeros[i]);
+		            if (i < cont - 1) {
+		                pw.print(",");
+		            }
+		        }
+
+		        System.out.println("Estado guardado en: " + rutaArchivo);
+
+		    } catch (FileNotFoundException e) {
+		        System.err.println("Error al guardar: " + e.getMessage());
+		    }
 		}
 }
 
