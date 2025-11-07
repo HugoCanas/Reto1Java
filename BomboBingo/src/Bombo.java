@@ -98,7 +98,7 @@ public class Bombo extends JFrame {
 		nuevoNumlabel.setForeground(new Color(0, 0, 0));
 
 		JLabel BolaNueva = new JLabel("");
-		BolaNueva.setIcon(new ImageIcon("C:\\Users\\Dam1\\Documents\\DAM1\\Retos\\1Ev\\Reto1Java\\images\\bolaverde.png"));
+		BolaNueva.setIcon(new ImageIcon(getClass().getResource("/images/bolaverde.png")));
 		BolaNueva.setBounds(0, 0, 251, 250);
 		NuevaPane.add(BolaNueva);
 
@@ -115,7 +115,7 @@ public class Bombo extends JFrame {
 		AnteriorPane.add(antNumlabel);
 
 		JLabel BolaAnterior = new JLabel("");
-		BolaAnterior.setIcon(new ImageIcon("C:\\Users\\Dam1\\Documents\\DAM1\\Retos\\1Ev\\Reto1Java\\images\\bolamorada.png"));
+		BolaAnterior.setIcon(new ImageIcon(getClass().getResource("/images/bolamorada.png")));
 		BolaAnterior.setBounds(0, 0, 100, 100);
 		AnteriorPane.add(BolaAnterior);
 
