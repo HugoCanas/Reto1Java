@@ -89,7 +89,7 @@ public class Bombo extends JFrame {
 		NuevaPane.setBounds(10, 37, 250, 250);
 		control.add(NuevaPane);
 
-		nuevoNumlabel = new JLabel("90");
+		nuevoNumlabel = new JLabel("");
 		nuevoNumlabel.setFont(new Font("Verdana", Font.BOLD, 50));
 		nuevoNumlabel.setHorizontalAlignment(SwingConstants.CENTER);
 		NuevaPane.setLayer(nuevoNumlabel, 1);
@@ -106,7 +106,7 @@ public class Bombo extends JFrame {
 		AnteriorPane.setBounds(241, 315, 100, 100);
 		control.add(AnteriorPane);
 
-		antNumlabel = new JLabel("90");
+		antNumlabel = new JLabel("");
 		AnteriorPane.setLayer(antNumlabel, 1);
 		antNumlabel.setHorizontalAlignment(SwingConstants.CENTER);
 		antNumlabel.setForeground(Color.BLACK);
@@ -141,11 +141,15 @@ public class Bombo extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				nuevoNumero(arrayNumeros);
+				if(cont==90)
+				{
+					newnumber.setEnabled(false);
+				}
 			}
 		});
 	}
 	
-//generar el numero nuevo que no este repetido
+	//generar el numero nuevo que no este repetido
 	public void nuevoNumero(int[] arrayNumeros2) {
 		int num;
 		boolean repetido;
@@ -166,7 +170,16 @@ public class Bombo extends JFrame {
 			System.out.print(arrayNumeros2[cont] + " ");
 			nuevoNumlabel.setText(Integer.toString(num));
 			botones[num-1].setEnabled(false);
+			numeroAnterior();
 			cont++;
+			
+		}
+	
+		public void numeroAnterior()
+		{
+			if(cont > 0) {
+				antNumlabel.setText(Integer.toString(arrayNumeros[cont-1]));
+			}
 		}
 }
 
