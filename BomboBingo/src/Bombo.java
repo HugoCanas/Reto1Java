@@ -3,14 +3,11 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.Panel;
 import java.awt.GridLayout;
-import java.awt.Button;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import java.awt.Color;
@@ -137,6 +134,8 @@ public class Bombo extends JFrame {
 
 		arrayNumeros = new int [90];
 		registrarEventos();
+		File f = new File("bombo_bingo.txt");
+		if (f.exists()) f.delete();
 	}
 
 	public void registrarEventos() {
