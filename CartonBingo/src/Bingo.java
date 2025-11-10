@@ -52,7 +52,7 @@ public class Bingo extends JFrame {
 	private boolean estado = true;
 	private boolean lineaEncontrada = false;
 	private boolean bingoEncontrado = false;
-	private Timer timer; 
+	private Timer timer;
 	private JLabel lblNumeroActual;
 
 
@@ -75,7 +75,6 @@ public class Bingo extends JFrame {
 	}
 
 	public Bingo() {
-
 
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -212,11 +211,10 @@ public class Bingo extends JFrame {
 		btn1.setBounds(39, 75, 112, 78);
 		contentPane.add(btn1);
 
-		JLabel lblNumeroBombo = new JLabel("67");
-		lblNumeroBombo.setFont(new Font("Verdana", Font.BOLD, 75));
-		lblNumeroBombo.setBounds(753, 154, 120, 104);
-		contentPane.add(lblNumeroBombo);
-
+		lblNumeroActual = new JLabel("--");
+		lblNumeroActual.setFont(new Font("Verdana", Font.BOLD, 75));
+		lblNumeroActual.setBounds(753, 154, 120, 104);
+		contentPane.add(lblNumeroActual);
 
 		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
 		lblNewLabel_1.setForeground(new Color(0, 0, 0));
@@ -224,9 +222,9 @@ public class Bingo extends JFrame {
 		lblNewLabel_1.setBounds(308, 1, 311, 63);
 		contentPane.add(lblNewLabel_1);
 
-		arrayBotones = new JButton [25];
+		arrayBotones = new JButton[25];
 
-		arrayNumeros = new int [25];
+		arrayNumeros = new int[25];
 
 		llenarArrayNumeros(arrayNumeros);
 
@@ -234,13 +232,9 @@ public class Bingo extends JFrame {
 
 		asignarNumerosABotones();
 
-		cargarPreguntas();
-
-		estadoBotones(estado);
-
 		clickBoton();
 
-		leerFichero(); 
+		leerFichero();
 
 	}
 
@@ -260,7 +254,7 @@ public class Bingo extends JFrame {
 		try {
 			Scanner sc = new Scanner(new File("bombo_bingo.txt"));
 
-			//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
+			//Leer la PRIMERA línea (último número)
 			int ultimoNumero = sc.nextInt();
 
 			lblNumeroActual.setText(String.valueOf(ultimoNumero));
@@ -273,6 +267,7 @@ public class Bingo extends JFrame {
 	}
 
 	private void llenarArrayNumeros(int[] arrayNumeros2) {
+		//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
 
 		int num;
 		boolean repetido;
@@ -331,18 +326,24 @@ public class Bingo extends JFrame {
 		arrayBotones2[19]= btn20;
 		arrayBotones2[20]= btn21;
 		arrayBotones2[21]= btn22;
-		arrayBotones2[22]= btn23;		
-		arrayBotones2[0]= btn1;
-		arrayBotones2[1]= btn2;
-		arrayBotones2[2]= btn3;
+		arrayBotones2[22]= btn23;
+		arrayBotones2[23]= btn24;
+		arrayBotones2[24]= btn25;
+
+	}
+
+	private void estadoBotones(boolean estado) {
+
+		for (int i = 0; i < arrayBotones.length; i++) {
+			arrayBotones[i].setEnabled(estado);
+		}
 
 	}
 
 	public void clickBoton() {
 		/*ARRAY DE BOTONES*/
 
-		for(JButton boton : arrayBotones ){ //For Each
-
+		for (JButton boton : arrayBotones) { //For Each
 
 			boton.addActionListener(new ActionListener() {
 
@@ -352,121 +353,83 @@ public class Bingo extends JFrame {
 					int resultado;
 
 					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
-					boton.setBackground(new java.awt.Color(150,33,33));
-					UIManager.put("Button.disabledText", Color.WHITE);;
 					boton.setBackground(new java.awt.Color(150, 33, 33));
-					UIManager.put("Button.disabledText", Color
-							arrayBotones2[23]= btn24;
-					arrayBotones2[24]= btn25;
+					UIManager.put("Button.disabledText", Color.WHITE);
+					boton.setEnabled(false);
 
-				}
+					if (bingoEncontrado==false) {
 
+						resultado=comprobacionBingo();
 
+						if (resultado==BINGO) {
+							bingoEncontrado=true;
+							System.out.println("¡HA HECHO BINGO!");
+							estadoBotones(false);
 
-				private void estadoBotones(boolean estado) {
+						} else if (lineaEncontrada==false) {
+							resultado=comprobacionLinea();
 
-					for(int i=0;i<arrayBotones.length;i++) {
-						arrayBotones[i].setEnabled(estado);
-					}
-
-				}
-
-				public void clickBoton() {
-
-					for (JButton boton : arrayBotones) {
-
-						boton.addActionListener(new ActionListener() {
-
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								int resultado;
-
-								boton.setBackground(new java.awt.Color(150, 33, 33));
-								UIManager.put("Button.disabledText", Color.WHITE);
-								boton.setEnabled(false);
-
-								if (bingoEncontrado == false) {
-
-									resultado = comprobacionBingo();
-
-									if (resultado == BINGO) {
-										bingoEncontrado = true;
-										System.out.println("HA HECHO BINGO!");
-										estadoBotones(false);
-										mostrarPregunta();
-
-									} else if (lineaEncontrada == false) {
-										resultado = comprobacionLinea();
-
-										if (resultado == LINEA) {
-											lineaEncontrada = true;
-											System.out.println("HA HECHO LÍNEA!");
-											mostrarPregunta();
-										}
-									}
-								}
-
+							if (resultado==LINEA) {
+								lineaEncontrada=true;
+								System.out.println("¡HA HECHO LÍNEA!");
 							}
-						});
-					}
-				}
-
-
-
-				public int comprobacionBingo() {
-
-					int activadas = 0;
-
-					for(int i = 0; i < arrayBotones.length; i++) {
-						if(arrayBotones[i].isEnabled()) {
-							activadas++;
 						}
 					}
 
-					if(activadas == 0) {
-						System.out.println("¡BINGO!");
-					}
-
-					return NO_FIN;
 				}
-				//LINEA
-				public int comprobacionLinea() {
+			});
+		}
+	}
 
-					for (int fila = 0; fila < 5; fila++) {
-						if (!arrayBotones[fila * 5 + 0].isEnabled() &&
-								!arrayBotones[fila * 5 + 1].isEnabled() &&
-								!arrayBotones[fila * 5 + 2].isEnabled() &&
-								!arrayBotones[fila * 5 + 3].isEnabled() &&
-								!arrayBotones[fila * 5 + 4].isEnabled()) {
-							return LINEA;
-						}
-					}
 
-					return NO_FIN;
-				}
 
-				private void cargarPreguntas() {
+	//BINGO
+	public int comprobacionBingo() {
 
-				}
+		int activadas = 0;
 
-				/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
-				 * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE
-				 *  NO SE PUEDA INTERRUMPIR EL FLUJO DE LA PREGUNTA CON QUE ALGUIEN HA GANADO.
-				 *  
-				 *  ADEMAS, SI DOS PERSONAS A LA VEZ HACEN LINEA O BINGO, HACER QUE A LOS DOS SE LES MUESTRE LA PREGUNTA PERO QUE SOLO UNO DE ELLOS PUEDA CONSEGUIR LA LINEA, ES DECIR,
-				 *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
-				 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
-				 *  
-				 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
-				 */
-
-				/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
-				 * 
-				 */
-
-				private void mostrarPregunta() {
-
-				}
-
+		for (int i=0;i<arrayBotones.length;i++) {
+			if (arrayBotones[i].isEnabled()) {
+				activadas++;
 			}
+		}
 
+		if (activadas == 0) {
+			return BINGO;
+		}
+
+		return NO_FIN;
+	}
+
+	//LINEA
+	public int comprobacionLinea() {
+
+		for (int fila = 0; fila < 5; fila++) {
+			if (!arrayBotones[fila*5+0].isEnabled() &&
+				!arrayBotones[fila*5+1].isEnabled() &&
+				!arrayBotones[fila*5+2].isEnabled() &&
+				!arrayBotones[fila*5+3].isEnabled() &&
+				!arrayBotones[fila*5+4].isEnabled()) {
+				return LINEA;
+			}
+		}
+
+		return NO_FIN;
+	}
+
+
+	/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
+	 * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE
+	 *  NO SE PUEDA INTERRUMPIR EL FLUJO DE LA PREGUNTA CON QUE ALGUIEN HA GANADO.
+	 *  
+	 *  ADEMAS, SI DOS PERSONAS A LA VEZ HACEN LINEA O BINGO, HACER QUE A LOS DOS SE LES MUESTRE LA PREGUNTA PERO QUE SOLO UNO DE ELLOS PUEDA CONSEGUIR LA LINEA, ES DECIR,
+	 *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
+	 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
+	 *  
+	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
+	 */
+
+	/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
+	 * 
+	 */
+}
