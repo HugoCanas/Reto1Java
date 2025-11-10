@@ -234,39 +234,12 @@ public class Bingo extends JFrame {
 
 		clickBoton();
 
-		leerFichero();
 		
 		iniciarMonitoreoArchivo();
 
 	}
 
-	//inicia el temporizador
-	private void leerFichero() {
-		timer = new Timer(2000, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				leerNumeroDelFichero();
-			}
-		});
-		timer.start();
-	}
-
-	// leer el fichero y mostrar en el label
-	private void leerNumeroDelFichero() {
-		try {
-			Scanner sc = new Scanner(new File("bombo_bingo.txt"));
-
-			//Leer la PRIMERA línea (último número)
-			int ultimoNumero = sc.nextInt();
-
-			lblNumeroActual.setText(String.valueOf(ultimoNumero));
-
-			sc.close();
-
-		} catch (FileNotFoundException e) {
-			System.out.println("Esperando números del bombo...");
-		}
-	}
+	
 
 	private void llenarArrayNumeros(int[] arrayNumeros2) {
 		//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
@@ -491,4 +464,12 @@ public class Bingo extends JFrame {
 	/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
 	 * 
 	 */
+    
+   /*COSAS PENDIENTES
+    * 1. NOMBRES DE JUGADOR Y MOSTRARLOS CUANDO HAGAN LINEA O BINGO
+    * 2. AÑADIR LAS PREGUNTAS Y SUS RESPECTIVAS FOTOS
+    * 3. MANDAR LINEA O BINGO TANTO A LOS OTROS JUGADORES COMO AL BOMBO
+    * 4. COMPROBACION DE LOS NUMEROS, TANTO EN LINEA COMO EN BINGO (Y MOSTRAR QUIEN HA GANADO A TODOS, TANTO EL DEL BOMBO COMO LOS DE LOS OTROS CARTONES.)
+    * 
+    */
 }
