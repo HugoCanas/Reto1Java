@@ -235,6 +235,8 @@ public class Bingo extends JFrame {
 		clickBoton();
 
 		leerFichero();
+		
+		iniciarMonitoreoArchivo();
 
 	}
 
@@ -379,6 +381,7 @@ public class Bingo extends JFrame {
 				}
 			});
 		}
+		
 	}
 
 
@@ -416,6 +419,62 @@ public class Bingo extends JFrame {
 
 		return NO_FIN;
 	}
+	private void iniciarMonitoreoArchivo() {
+        String rutaArchivo = "../BomboBingo/bombo_bingo.txt";
+        
+        // Timer que se ejecuta cada 1 segundo (1000 ms)
+        Timer timer = new Timer(500, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                File archivo = new File(rutaArchivo);
+                
+                if (archivo.exists()) {
+                    long modificacion = archivo.lastModified();
+                    
+                    long ultimaModificacion= 0;
+                    // Solo cargar si el archivo cambió
+                    if (modificacion != ultimaModificacion) {
+                        ultimaModificacion = modificacion;
+                        cargarNumero();
+                    }
+                }
+            }
+        });
+        
+        timer.start(); // Iniciar el timer
+    }
+    
+    public void cargarNumero() {
+        int cont;
+        
+        String rutaArchivo = "../BomboBingo/bombo_bingo.txt";
+        
+        try (Scanner sc = new Scanner(new File(rutaArchivo))) {
+            // Leer primera línea (último número)
+            int ultimoNumero = sc.nextInt();
+            sc.nextLine(); // Consumir el salto de línea
+            lblNumeroActual.setText(Integer.toString(ultimoNumero));
+            
+            // Leer segunda línea (todos los números)
+            String lineaNumeros = sc.nextLine();
+            String[] numerosTexto = lineaNumeros.split(",");
+            
+            // Reconstruir datos
+            cont = numerosTexto.length;
+            arrayNumeros = new int[90];
+            
+            for (int i = 0; i < cont; i++) {
+                arrayNumeros[i] = Integer.parseInt(numerosTexto[i].trim());
+            }
+            
+        } catch (FileNotFoundException e) {
+            System.err.println("Archivo no encontrado");
+            cont = 0;
+        } catch (Exception e) {
+            System.err.println("Error al cargar: " + e.getMessage());
+            cont = 0;
+        }
+    }
 
 
 	/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
