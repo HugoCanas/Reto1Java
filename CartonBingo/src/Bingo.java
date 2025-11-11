@@ -5,15 +5,22 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.Color;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Scanner;
-import javax.swing.UIManager;
 
 public class Bingo extends JFrame {
 
@@ -49,12 +56,10 @@ public class Bingo extends JFrame {
 	private JButton btn25;
 	private JButton[] arrayBotones;
 	private int[] arrayNumeros;
-	private boolean estado = true;
 	private boolean lineaEncontrada = false;
 	private boolean bingoEncontrado = false;
-	private Timer timer;
 	private JLabel lblNumeroActual;
-
+	private String nombreJugador;
 
 	/**
 	 * Launch the application.
@@ -221,10 +226,19 @@ public class Bingo extends JFrame {
 		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
 		lblNewLabel_1.setBounds(308, 1, 311, 63);
 		contentPane.add(lblNewLabel_1);
+		
+		addWindowListener(new WindowAdapter() {
+		    @Override
+		    public void windowClosing(WindowEvent e) {
+		        borrarNombreJugador(nombreJugador);
+		    }
+		});
 
 		arrayBotones = new JButton[25];
 
 		arrayNumeros = new int[25];
+		
+		pedirNombreJugador();
 
 		llenarArrayNumeros(arrayNumeros);
 
@@ -234,12 +248,71 @@ public class Bingo extends JFrame {
 
 		clickBoton();
 
-		
 		iniciarMonitoreoArchivo();
 
 	}
 
-	
+    private void pedirNombreJugador() {
+        boolean valido = false;
+        while (!valido) {
+            nombreJugador = JOptionPane.showInputDialog("Introduce tu nombre:");
+            if (nombreJugador == null || nombreJugador.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "El nombre no puede estar vacío.");
+                continue;
+            }
+            if (nombreRepetido(nombreJugador)) {
+                JOptionPane.showMessageDialog(null, "Ese nombre ya está en uso.");
+            } else {
+                guardarNombre(nombreJugador);
+                valido = true;
+            }
+        }
+    }
+
+    private boolean nombreRepetido(String nombre) {
+        File f = new File("nombres_jugadores.txt");
+        if (!f.exists()) return false;
+        try (Scanner sc = new Scanner(f)) {
+            while (sc.hasNextLine()) {
+                if (sc.nextLine().trim().equalsIgnoreCase(nombre.trim())) return true;
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private void guardarNombre(String nombre) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("nombres_jugadores.txt", true))) {
+            pw.println(nombre);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void borrarNombreJugador(String nombre) {
+        File archivo = new File("nombres_jugadores.txt");
+        if (!archivo.exists()) return;
+
+        File temporal = new File("nombres_jugadores_temp.txt");
+        try (BufferedReader br = new BufferedReader(new FileReader(archivo));
+             PrintWriter pw = new PrintWriter(new FileWriter(temporal))) {
+
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                if (!linea.trim().equalsIgnoreCase(nombre.trim())) {
+                    pw.println(linea);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Reemplazar archivo original
+        if (archivo.delete()) {
+            temporal.renameTo(archivo);
+        }
+    }
 
 	private void llenarArrayNumeros(int[] arrayNumeros2) {
 		//FUNCION QUE SE ENCARGA DE GENERAR NUMEROS CADA POSICION DEL ARRAY Y COMPRUEBA QUE NO SE REPITAN
@@ -307,58 +380,43 @@ public class Bingo extends JFrame {
 
 	}
 
-	private void estadoBotones(boolean estado) {
+	private void clickBoton() {
+        for (JButton boton : arrayBotones) {
+            boton.addActionListener(e -> {
+                boton.setBackground(new Color(150, 33, 33));
+                boton.setEnabled(false);
 
-		for (int i = 0; i < arrayBotones.length; i++) {
-			arrayBotones[i].setEnabled(estado);
-		}
+                if (!bingoEncontrado) {
+                    if (comprobacionBingo() == BINGO) {
+                        bingoEncontrado = true;
+                        notificarEvento("BINGO");
+                        JOptionPane.showMessageDialog(null, "¡BINGO!");
+                        desactivarBotones();
+                    } else if (!lineaEncontrada && comprobacionLinea() == LINEA) {
+                        lineaEncontrada = true;
+                        notificarEvento("LINEA");
+                        JOptionPane.showMessageDialog(null, "¡LÍNEA!");
+                    }
+                }
+            });
+        }
+    }
+	
+	 private void notificarEvento(String tipo) {
+		 String rutaArchivo = new File("eventos_bingo.txt").getAbsolutePath();
 
-	}
+		    try (PrintWriter pw = new PrintWriter(new File(rutaArchivo))) {
+	            pw.println(tipo + ":" + nombreJugador);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	 
+	 private void desactivarBotones() {
+	        for (JButton b : arrayBotones) b.setEnabled(false);
+	    }
 
-	public void clickBoton() {
-		/*ARRAY DE BOTONES*/
-
-		for (JButton boton : arrayBotones) { //For Each
-
-			boton.addActionListener(new ActionListener() {
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// TODO Auto-generated method stub
-					int resultado;
-
-					//METER UNICAMENTE LA LOGICA QUE AFECTA AL HACER CLICK EL BOTON
-					boton.setBackground(new java.awt.Color(150, 33, 33));
-					UIManager.put("Button.disabledText", Color.WHITE);
-					boton.setEnabled(false);
-
-					if (bingoEncontrado==false) {
-
-						resultado=comprobacionBingo();
-
-						if (resultado==BINGO) {
-							bingoEncontrado=true;
-							System.out.println("¡HA HECHO BINGO!");
-							estadoBotones(false);
-
-						} else if (lineaEncontrada==false) {
-							resultado=comprobacionLinea();
-
-							if (resultado==LINEA) {
-								lineaEncontrada=true;
-								System.out.println("¡HA HECHO LÍNEA!");
-							}
-						}
-					}
-
-				}
-			});
-		}
-		
-	}
-
-
-
+	 
 	//BINGO
 	public int comprobacionBingo() {
 
@@ -448,7 +506,6 @@ public class Bingo extends JFrame {
             cont = 0;
         }
     }
-
 
 	/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
 	 * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE

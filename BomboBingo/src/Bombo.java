@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.Scanner;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import java.awt.Color;
@@ -16,7 +17,10 @@ import javax.swing.border.BevelBorder;
 import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
 import java.awt.Font;
 
 public class Bombo extends JFrame {
@@ -134,6 +138,7 @@ public class Bombo extends JFrame {
 
 		arrayNumeros = new int [90];
 		registrarEventos();
+		monitorearEventos();
 		File f = new File("bombo_bingo.txt");
 		if (f.exists()) f.delete();
 	}
@@ -210,6 +215,37 @@ public class Bombo extends JFrame {
 		    } catch (FileNotFoundException e) {
 		        System.err.println("Error al guardar: " + e.getMessage());
 		    }
+		}
+		
+		private void monitorearEventos() {
+		    Timer timer = new Timer(500, e -> {
+		        String rutaArchivo = "../CartonBingo/eventos_bingo.txt";
+		        File f = new File(rutaArchivo);
+		        if (!f.exists()) return;
+
+		        try (Scanner scanner = new Scanner(f)) {
+		            while (scanner.hasNextLine()) {
+		                String linea = scanner.nextLine();
+		                if (linea.startsWith("LINEA:")) {
+		                    String jugador = linea.substring(6);
+		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha hecho LÍNEA!");
+		                } else if (linea.startsWith("BINGO:")) {
+		                    String jugador = linea.substring(6);
+		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha hecho BINGO!");
+		                }
+		            }
+		        } catch (FileNotFoundException ex) {
+		            ex.printStackTrace();
+		        }
+
+		        // Vaciar archivo con PrintWriter
+		        try (PrintWriter pw = new PrintWriter(rutaArchivo)) {
+		            // Solo abrirlo ya lo vacía
+		        } catch (FileNotFoundException ex) {
+		            ex.printStackTrace();
+		        }
+		    });
+		    timer.start();
 		}
 }
 
