@@ -7,6 +7,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 import java.awt.event.ActionEvent;
@@ -38,6 +40,7 @@ public class Bombo extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		new File("C:/BingoCompartido").mkdirs();
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -139,8 +142,16 @@ public class Bombo extends JFrame {
 		arrayNumeros = new int [90];
 		registrarEventos();
 		monitorearEventos();
-		File f = new File("bombo_bingo.txt");
+		
+		File f = new File("C:/BingoCompartido/bombo_bingo.txt");
 		if (f.exists()) f.delete();
+		
+		// Resetear estado de línea al iniciar
+		try (PrintWriter pw = new PrintWriter(new FileWriter("C:/BingoCompartido/linea_estado.txt"))) {
+		    pw.println("PENDIENTE");
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
 	}
 
 	public void registrarEventos() {
@@ -192,7 +203,7 @@ public class Bombo extends JFrame {
 		
 		public void guardarNumero() {
 
-			String rutaArchivo = new File("bombo_bingo.txt").getAbsolutePath();
+			String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";
 
 		    try (PrintWriter pw = new PrintWriter(new File(rutaArchivo))) {
 		        // Primera línea: número actual (el último que salió)
@@ -219,28 +230,52 @@ public class Bombo extends JFrame {
 		
 		private void monitorearEventos() {
 		    Timer timer = new Timer(500, e -> {
-		        String rutaArchivo = "../CartonBingo/eventos_bingo.txt";
+		        String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
 		        File f = new File(rutaArchivo);
-		        if (!f.exists()) return;
+		        if (!f.exists()) {
+		            try {
+		                f.createNewFile();
+		            } catch (IOException ex) {
+		                ex.printStackTrace();
+		            }
+		        }
 
 		        try (Scanner scanner = new Scanner(f)) {
+		            boolean leido = false;
 		            while (scanner.hasNextLine()) {
 		                String linea = scanner.nextLine();
+		                System.out.println("[DEBUG] Leído de eventos_bingo.txt: " + linea);
 		                if (linea.startsWith("LINEA:")) {
+		                    leido = true;
 		                    String jugador = linea.substring(6);
 		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha hecho LÍNEA!");
 		                } else if (linea.startsWith("BINGO:")) {
+		                    leido = true;
 		                    String jugador = linea.substring(6);
 		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha hecho BINGO!");
+		                } else if (linea.startsWith("COMPROBANDO:")) {
+		                    leido = true;
+		                    String[] partes = linea.split(":");
+		                    String jugador = partes[1];
+		                    String tipo = partes[2];
+		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha hecho " + tipo + "! Se está comprobando...");
+		                } else if (linea.startsWith("FALLO:")) {
+		                    leido = true;
+		                    String[] partes = linea.split(":");
+		                    String jugador = partes[1];
+		                    String tipo = partes[2];
+		                    JOptionPane.showMessageDialog(null, "¡" + jugador + " ha fallado la pregunta! El juego continúa.");
 		                }
 		            }
-		        } catch (FileNotFoundException ex) {
-		            ex.printStackTrace();
-		        }
 
-		        // Vaciar archivo con PrintWriter
-		        try (PrintWriter pw = new PrintWriter(rutaArchivo)) {
-		            // Solo abrirlo ya lo vacía
+		            //Solo borra si se ha leído y procesado al menos un evento válido
+		            if (leido) {
+		                try (PrintWriter pw = new PrintWriter(rutaArchivo)) {
+		                    // Vaciar archivo
+		                } catch (FileNotFoundException ex) {
+		                    ex.printStackTrace();
+		                }
+		            }
 		        } catch (FileNotFoundException ex) {
 		            ex.printStackTrace();
 		        }

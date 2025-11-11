@@ -60,11 +60,17 @@ public class Bingo extends JFrame {
 	private boolean bingoEncontrado = false;
 	private JLabel lblNumeroActual;
 	private String nombreJugador;
+	private boolean esperandoValidacion = false;
+	private String tipoEventoPendiente = "";
+	private boolean[] filaFallida = new boolean[5];
+	private int filaActualLinea = -1; // Guardar qué fila está siendo validada
+	private boolean lineaGlobalConfirmada = false; // Estado local del archivo compartido
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		new File("C:/BingoCompartido").mkdirs();
 
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -238,6 +244,8 @@ public class Bingo extends JFrame {
 
 		arrayNumeros = new int[25];
 		
+		
+		
 		pedirNombreJugador();
 
 		llenarArrayNumeros(arrayNumeros);
@@ -249,6 +257,8 @@ public class Bingo extends JFrame {
 		clickBoton();
 
 		iniciarMonitoreoArchivo();
+		
+		monitorearEstadoLinea();
 
 	}
 
@@ -383,40 +393,174 @@ public class Bingo extends JFrame {
 	private void clickBoton() {
         for (JButton boton : arrayBotones) {
             boton.addActionListener(e -> {
+                // Si ya está esperando validación, no hacer nada
+                if (esperandoValidacion) return;
+                
                 boton.setBackground(new Color(150, 33, 33));
                 boton.setEnabled(false);
 
-                if (!bingoEncontrado) {
-                    if (comprobacionBingo() == BINGO) {
-                        bingoEncontrado = true;
-                        notificarEvento("BINGO");
-                        JOptionPane.showMessageDialog(null, "¡BINGO!");
-                        desactivarBotones();
-                    } else if (!lineaEncontrada && comprobacionLinea() == LINEA) {
+                // Comprobar BINGO primero (tiene prioridad)
+                if (!bingoEncontrado && comprobacionBingo() == BINGO) {
+                    bingoEncontrado = true;
+                    notificarEvento("BINGO");
+                    desactivarBotones();
+                } 
+                // Solo comprobar LINEA si no hay bingo Y si no se ha confirmado línea globalmente
+                else if (!lineaEncontrada && !bingoEncontrado && !lineaGlobalConfirmada) {
+                    int resultadoLinea = comprobacionLineaConFila(); // Devuelve el número de fila
+                    if (resultadoLinea >= 0) {
+                        filaActualLinea = resultadoLinea;
                         lineaEncontrada = true;
                         notificarEvento("LINEA");
-                        JOptionPane.showMessageDialog(null, "¡LÍNEA!");
                     }
                 }
             });
         }
     }
 	
-	 private void notificarEvento(String tipo) {
-		 String rutaArchivo = new File("eventos_bingo.txt").getAbsolutePath();
+	private void notificarEvento(String tipo) {
+	    if (esperandoValidacion) return;
+	    
+	    // Verificar que los números realmente han salido
+	    boolean valido = false;
+	    
+	    if (tipo.equals("LINEA")) {
+	        // Verificar que todos los números de la fila detectada han salido
+	        if (filaActualLinea >= 0) {
+	            valido = true;
+	            for (int col = 0; col < 5; col++) {
+	                int num = Integer.parseInt(arrayBotones[filaActualLinea * 5 + col].getText());
+	                if (!numeroHaSalido(num)) {
+	                    valido = false;
+	                    break;
+	                }
+	            }
+	        }
+	    } else if (tipo.equals("BINGO")) {
+	        valido = numerosDeBingoHanSalido();
+	    }
 
-		    try (PrintWriter pw = new PrintWriter(new File(rutaArchivo))) {
-	            pw.println(tipo + ":" + nombreJugador);
-	        } catch (IOException e) {
-	            e.printStackTrace();
+	    // Si no es válido (números no han salido), informar y desmarcar
+	    if (!valido) {
+	        System.out.println("[DEBUG] " + tipo + " no válida - números no han salido");
+	        JOptionPane.showMessageDialog(null, 
+	            "¡" + tipo + " no válida! Algunos números aún no han salido del bombo.", 
+	            "Aviso", 
+	            JOptionPane.WARNING_MESSAGE);
+	        
+	        desmarcarNumerosNoValidos();
+	        
+	        // IMPORTANTE: Resetear el flag para permitir intentarlo de nuevo
+	        if (tipo.equals("LINEA")) {
+	            lineaEncontrada = false;
+	            filaActualLinea = -1;
+	        } else if (tipo.equals("BINGO")) {
+	            bingoEncontrado = false;
+	        }
+	        return;
+	    }
+
+	    // Si es válido, proceder con la pregunta
+	    esperandoValidacion = true;
+	    tipoEventoPendiente = tipo;
+
+	    // Notificar al bombo que se está comprobando
+	    String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(rutaArchivo))) {
+	        pw.println("COMPROBANDO:" + nombreJugador + ":" + tipo);
+	        System.out.println("[DEBUG] Escrito: COMPROBANDO:" + nombreJugador + ":" + tipo);
+	    } catch (IOException e) {
+	        System.err.println("[ERROR] No se pudo escribir el evento: " + e.getMessage());
+	    }
+
+	    // Hacer la pregunta
+	    hacerPreguntaSostenibilidad(tipo);
+	}
+	
+	private void desmarcarNumerosNoValidos() {
+	    for (JButton boton : arrayBotones) {
+	        if (!boton.isEnabled()) { // Está marcado
+	            int num = Integer.parseInt(boton.getText());
+	            if (!numeroHaSalido(num)) {
+	                boton.setEnabled(true);
+	                boton.setBackground(null); // O el color original
+	            }
 	        }
 	    }
-	 
-	 private void desactivarBotones() {
-	        for (JButton b : arrayBotones) b.setEnabled(false);
+	}
+	
+	private void desactivarBotones() {
+        for (JButton b : arrayBotones) b.setEnabled(false);
+    }
+	
+	private void hacerPreguntaSostenibilidad(String tipo) {
+	    // Pregunta de ejemplo
+	    String pregunta = "¿Cuántos litros de agua se necesitan para producir 1 kg de carne de vaca?";
+	    String[] opciones = {"500 L", "5.000 L", "15.000 L"};
+	    int respuestaCorrecta = 2;
+
+	    int respuesta = JOptionPane.showOptionDialog(
+	        this,
+	        pregunta,
+	        "Pregunta de Sostenibilidad - " + tipo,
+	        JOptionPane.DEFAULT_OPTION,
+	        JOptionPane.QUESTION_MESSAGE,
+	        null,
+	        opciones,
+	        opciones[0]
+	    );
+
+	    boolean acierto = (respuesta == respuestaCorrecta);
+
+	    String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(rutaArchivo))) {
+	        if (acierto) {
+	            pw.println(tipo + ":" + nombreJugador);
+	            JOptionPane.showMessageDialog(null, "¡Acertaste! " + tipo + " válida.");
+	            
+	            // Si acertó LÍNEA, marcarla como confirmada globalmente
+	            if (tipo.equals("LINEA")) {
+	                setEstadoLinea("CONFIRMADA:" + nombreJugador);
+	                lineaGlobalConfirmada = true;
+	                System.out.println("[DEBUG] Línea confirmada globalmente por " + nombreJugador);
+	            }
+	            
+	        } else {
+	            pw.println("FALLO:" + nombreJugador + ":" + tipo);
+	            
+	            if (tipo.equals("LINEA")) {
+	                JOptionPane.showMessageDialog(null, 
+	                    "¡Respuesta incorrecta! Esta línea ya no será válida para ti, pero puedes intentar con otra.", 
+	                    "Fallo", 
+	                    JOptionPane.ERROR_MESSAGE);
+	                
+	                // CLAVE: Marcar la fila como fallida ANTES de resetear
+	                if (filaActualLinea >= 0) {
+	                    filaFallida[filaActualLinea] = true;
+	                    System.out.println("[DEBUG] Fila " + filaActualLinea + " marcada como fallida para " + nombreJugador);
+	                }
+	                
+	                // Resetear los flags para poder detectar OTRAS líneas
+	                lineaEncontrada = false;
+	                filaActualLinea = -1;
+	                
+	            } else if (tipo.equals("BINGO")) {
+	                JOptionPane.showMessageDialog(null, 
+	                    "¡Respuesta incorrecta! Has perdido la oportunidad de ganar.", 
+	                    "Fallo", 
+	                    JOptionPane.ERROR_MESSAGE);
+	                
+	                // En bingo, si falla pierde para siempre
+	                // Mantener bingoEncontrado = true para evitar reintentos
+	            }
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
 	    }
 
-	 
+	    esperandoValidacion = false;
+	}
+
 	//BINGO
 	public int comprobacionBingo() {
 
@@ -437,22 +581,114 @@ public class Bingo extends JFrame {
 
 	//LINEA
 	public int comprobacionLinea() {
-
-		for (int fila = 0; fila < 5; fila++) {
-			if (!arrayBotones[fila*5+0].isEnabled() &&
-				!arrayBotones[fila*5+1].isEnabled() &&
-				!arrayBotones[fila*5+2].isEnabled() &&
-				!arrayBotones[fila*5+3].isEnabled() &&
-				!arrayBotones[fila*5+4].isEnabled()) {
-				return LINEA;
-			}
-		}
-
-		return NO_FIN;
+	    return (comprobacionLineaConFila() >= 0) ? LINEA : NO_FIN;
 	}
+	
+	// Nuevo método que devuelve QUÉ fila es la línea
+	private int comprobacionLineaConFila() {
+	    for (int fila = 0; fila < 5; fila++) {
+	        // Saltar filas que ya han sido falladas por ESTE jugador
+	        if (filaFallida[fila]) {
+	            continue;
+	        }
+	        
+	        // Comprobar si la fila está completa
+	        boolean filaCompleta = true;
+	        for (int col = 0; col < 5; col++) {
+	            if (arrayBotones[fila * 5 + col].isEnabled()) {
+	                filaCompleta = false;
+	                break;
+	            }
+	        }
+	        
+	        if (filaCompleta) {
+	            System.out.println("[DEBUG] Fila " + fila + " detectada como línea");
+	            return fila; // Devolver el número de fila
+	        }
+	    }
+	    return -1; // No hay línea
+	}
+	
+	private boolean numerosDeBingoHanSalido() {
+	    for (JButton boton : arrayBotones) {
+	        if (!boton.isEnabled()) {
+	            int num = Integer.parseInt(boton.getText());
+	            if (!numeroHaSalido(num)) return false;
+	        }
+	    }
+	    return true;
+	}
+
+	private boolean numeroHaSalido(int num) {
+	    File archivo = new File("C:/BingoCompartido/bombo_bingo.txt");
+	    if (!archivo.exists()) return false;
+
+	    try (Scanner sc = new Scanner(archivo)) {
+	        if (!sc.hasNextInt()) return false;
+	        sc.nextInt(); // saltar número actual
+
+	        if (!sc.hasNextLine()) return false;
+	        sc.nextLine(); // saltar salto de línea
+
+	        if (!sc.hasNextLine()) return false;
+	        String linea = sc.nextLine(); // línea con todos los números
+
+	        String[] numeros = linea.split(",");
+	        for (String n : numeros) {
+	            String str = n.trim();
+	            if (!str.isEmpty() && Integer.parseInt(str) == num) {
+	                return true;
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+	
+	private String obtenerEstadoLinea() {
+	    File f = new File("C:/BingoCompartido/linea_estado.txt");
+	    if (!f.exists()) return "PENDIENTE";
+	    try (Scanner sc = new Scanner(f)) {
+	        return sc.hasNextLine() ? sc.nextLine().trim() : "PENDIENTE";
+	    } catch (Exception e) {
+	        return "PENDIENTE";
+	    }
+	}
+	
+	private void setEstadoLinea(String estado) {
+	    try (PrintWriter pw = new PrintWriter(new FileWriter("C:/BingoCompartido/linea_estado.txt"))) {
+	        pw.println(estado);
+	        System.out.println("[DEBUG] Estado de línea actualizado: " + estado);
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	private void monitorearEstadoLinea() {
+	    Timer timer = new Timer(500, e -> {
+	        String estado = obtenerEstadoLinea();
+	        
+	        if (estado.startsWith("CONFIRMADA:") && !lineaGlobalConfirmada) {
+	            lineaGlobalConfirmada = true;
+	            String ganador = estado.substring(11);
+	            
+	            // Solo mostrar mensaje si NO es este jugador
+	            if (!ganador.equals(nombreJugador)) {
+	                JOptionPane.showMessageDialog(null, 
+	                    "¡" + ganador + " ha conseguido LÍNEA! Ya no se pueden hacer más líneas.", 
+	                    "Línea confirmada", 
+	                    JOptionPane.INFORMATION_MESSAGE);
+	            }
+	            
+	            System.out.println("[DEBUG] Línea global confirmada. Jugador: " + nombreJugador + " ya no puede hacer líneas.");
+	        }
+	    });
+	    timer.start();
+	}
+	
 	private void iniciarMonitoreoArchivo() {
-        String rutaArchivo = "../BomboBingo/bombo_bingo.txt";
-        
+		String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";        
         // Timer que se ejecuta cada 1 segundo (1000 ms)
         Timer timer = new Timer(500, new ActionListener() {
             @Override
@@ -478,15 +714,30 @@ public class Bingo extends JFrame {
     public void cargarNumero() {
         int cont;
         
-        String rutaArchivo = "../BomboBingo/bombo_bingo.txt";
+        String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";
         
-        try (Scanner sc = new Scanner(new File(rutaArchivo))) {
-            // Leer primera línea (último número)
+        File archivo = new File(rutaArchivo);
+        if (!archivo.exists()) {
+            try {
+                archivo.createNewFile();
+                try (PrintWriter pw = new PrintWriter(new FileWriter(archivo))) {
+                    pw.println("0");
+                    pw.print("");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try (Scanner sc = new Scanner(archivo)) {
+            if (!sc.hasNextInt()) return; // <-- SALVA SI ESTÁ VACÍO
             int ultimoNumero = sc.nextInt();
-            sc.nextLine(); // Consumir el salto de línea
             lblNumeroActual.setText(Integer.toString(ultimoNumero));
-            
-            // Leer segunda línea (todos los números)
+
+            if (!sc.hasNextLine()) return; // <-- SALVA SI NO HAY MÁS
+            sc.nextLine(); // consumir salto
+
+            if (!sc.hasNextLine()) return; // <-- SALVA SI NO HAY SEGUNDA LÍNEA
             String lineaNumeros = sc.nextLine();
             String[] numerosTexto = lineaNumeros.split(",");
             
@@ -506,27 +757,25 @@ public class Bingo extends JFrame {
             cont = 0;
         }
     }
-
-	/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
-	 * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE
-	 *  NO SE PUEDA INTERRUMPIR EL FLUJO DE LA PREGUNTA CON QUE ALGUIEN HA GANADO.
-	 *  
-	 *  ADEMAS, SI DOS PERSONAS A LA VEZ HACEN LINEA O BINGO, HACER QUE A LOS DOS SE LES MUESTRE LA PREGUNTA PERO QUE SOLO UNO DE ELLOS PUEDA CONSEGUIR LA LINEA, ES DECIR,
-	 *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
-	 *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
-	 *  
-	 *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
-	 */
-
-	/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
-	 * 
-	 */
-    
-   /*COSAS PENDIENTES
-    * 1. NOMBRES DE JUGADOR Y MOSTRARLOS CUANDO HAGAN LINEA O BINGO
-    * 2. AÑADIR LAS PREGUNTAS Y SUS RESPECTIVAS FOTOS
-    * 3. MANDAR LINEA O BINGO TANTO A LOS OTROS JUGADORES COMO AL BOMBO
-    * 4. COMPROBACION DE LOS NUMEROS, TANTO EN LINEA COMO EN BINGO (Y MOSTRAR QUIEN HA GANADO A TODOS, TANTO EL DEL BOMBO COMO LOS DE LOS OTROS CARTONES.)
-    * 
-    */
 }
+
+/*PARA LAS PREGUNTAS DE SOSTENIBILIDAD SIRVE TANTO UN POPUP COMO UNA NUEVA CLASE, YA SE BARAJEARA QUE USAR, 
+ * ADEMAS YO HARIA QUE MIENTRAS SE LE ESTA HACIENDO LA PREGUNTA A UN USUARIO QUE EL RESTO NO PUEDA CLIKAR LOS BOTONES PARA QUE
+ *  NO SE PUEDA INTERRUMPIR EL FLUJO DE LA PREGUNTA CON QUE ALGUIEN HA GANADO.
+ *  
+ *  ADEMAS, SI DOS PERSONAS A LA VEZ HACEN LINEA O BINGO, HACER QUE A LOS DOS SE LES MUESTRE LA PREGUNTA PERO QUE SOLO UNO DE ELLOS PUEDA CONSEGUIR LA LINEA, ES DECIR,
+ *  QUE LOS DOS TENGAN LA OPORTUNIDAD DE RESPONDER Y SOLO SE LLEVE LA PREGUNTA EL QUE MAS RAPIDO HAYA CONTESTADO, PORQUE SINO,SI LE SACO LA PREGUNTA A SOLO UNO Y 
+ *  FALLA,EL OTRO SE HA QUEDADO SIN DERECHO DE PODER RESPONDER Y NADIE HA HECHO BINGO.
+ *  
+ *  PREGUNTA, SI ALGUIEN HACE BINGO Y FALLA LA PREGUNTA DE SOSTENIBILIDAD QUE HAGO? NO LE DOY BINGO? ENTONCES YA HA PERDIDO LA OPORTUNIDAD DE GANAR PARA SIEMPRE. (SI)
+ */
+
+/*HAY QUE HACER QUE EL USUARIO META SU NOMBRE ASI LUEGO AL GANAR O HACER LINEA SE PUEDE MOSTRAR EL NOMBRE DE USUARIO EN LA PANTALLA DEL RESTO.
+ * 
+ */
+
+/*COSAS PENDIENTES
+* 1. CERRAR LA VENTANA DE ESPERANDO Y MOSTRAR A LOS DEMAS EL JUGADOR QUE HA HECHO LINEA O BINGO
+* 2. AÑADIR LAS PREGUNTAS Y SUS RESPECTIVAS FOTOS
+* 3. REVISAR REDUNDANCIAS Y CORREGIR CODIGO
+*/
