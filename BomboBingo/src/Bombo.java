@@ -23,6 +23,7 @@ import java.awt.Font;
 public class Bombo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+
 	private static final String RUTA_CARPETA = ".\\BingoCompartido";
 	private static final String RUTA_BOMBO   = RUTA_CARPETA + "\\bombo_bingo.txt";
 	private static final String RUTA_LINEA   = RUTA_CARPETA + "\\linea_estado.txt";
@@ -30,11 +31,11 @@ public class Bombo extends JFrame {
 
 	private JPanel contentPane;
 	private JButton newnumber;
-	private int[] arrayNumeros;
-	private JButton[] botones;
+	private int[] arrayNumeros; // Números ya salidos
+	private JButton[] botones; // Botones del cartón del bombo (1-90)
 	private JLabel nuevoNumlabel;
 	private JLabel antNumlabel;
-	private int cont = 0;
+	private int cont = 0; // Contador de números sacados
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
@@ -131,32 +132,76 @@ public class Bombo extends JFrame {
 		control.add(lblBolaAnterior);
 
 		arrayNumeros = new int[90];
+		
+		crearEstructuraArchivos(); 
+		
 		registrarEventos();
 		monitorearEventos();
 	}
 
+
+	// GRUPO 1: LÓGICA DE ARCHIVOS
+
+	private void crearEstructuraArchivos() {
+		File carpeta = new File(RUTA_CARPETA);
+        if (!carpeta.exists()) {
+            if (!carpeta.mkdirs()) {
+				System.err.println("ERROR: No se pudo crear la carpeta compartida: " + RUTA_CARPETA);
+				return;
+			}
+        }
+
+		try {
+            if (new File(RUTA_BOMBO).createNewFile()) {}
+            if (new File(RUTA_LINEA).createNewFile()) {}
+            if (new File(RUTA_EVENTOS).createNewFile()) {}
+        } catch (IOException ex) { 
+			System.err.println("ERROR: Fallo al crear un archivo inicial. Detalle: " + ex.getMessage());
+        }
+	}
+
+	private void guardarNumero() {
+		try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
+			//Último número sacado
+			pw.println(cont > 0 ? arrayNumeros[cont - 1] : "0"); 
+			
+			//Lista de todos los números sacados separados por comas
+			for (int i = 0; i < cont; i++) {
+				pw.print(arrayNumeros[i]);
+				if (i < cont - 1) pw.print(",");
+			}
+			pw.println(); 
+		} catch (FileNotFoundException ex) {
+			System.err.println("ERROR: No se pudo escribir en el archivo del bombo (" + RUTA_BOMBO + "). Detalle: " + ex.getMessage());
+		}
+	}
+	
+	// GRUPO 2: LÓGICA DE BOMBO (GENERACIÓN DE NÚMEROS)
+	
 	private void registrarEventos() {
 		newnumber.addActionListener(e -> {
-			nuevoNumero(arrayNumeros);
+			nuevoNumero(); 
 			if (cont == 90) newnumber.setEnabled(false);
 		});
 	}
 
-	private void nuevoNumero(int[] bolas) {
+	private void nuevoNumero() {
+		if (cont >= 90) return; 
+
 		int num;
 		boolean repetido;
 		do {
 			num = (int) (Math.random() * 90) + 1;
 			repetido = false;
-			for (int j = 0; j < cont; j++) {
-				if (bolas[j] == num) {
+			for (int j = 0; j < cont; j++) { 
+				if (arrayNumeros[j] == num) {
 					repetido = true;
 					break;
 				}
 			}
 		} while (repetido);
 
-		bolas[cont] = num;
+		arrayNumeros[cont] = num;
 		nuevoNumlabel.setText(String.valueOf(num));
 		botones[num - 1].setEnabled(false);
 		numeroAnterior();
@@ -168,24 +213,12 @@ public class Bombo extends JFrame {
 		if (cont > 0) antNumlabel.setText(String.valueOf(arrayNumeros[cont - 1]));
 	}
 
-	private void guardarNumero() {
-		try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
-			pw.println(cont > 0 ? arrayNumeros[cont - 1] : "0");
-			for (int i = 0; i < cont; i++) {
-				pw.print(arrayNumeros[i]);
-				if (i < cont - 1) pw.print(",");
-			}
-		} catch (FileNotFoundException ex) {
-			/* silencioso */
-		}
-	}
+	// GRUPO 3: MONITOREO DE EVENTOS DE JUGADORES
 
 	private void monitorearEventos() {
 		Timer timer = new Timer(500, e -> {
 			File f = new File(RUTA_EVENTOS);
-			if (!f.exists()) {
-				try { f.createNewFile(); } catch (IOException ignored) { }
-			}
+
 			boolean leido = false;
 			try (Scanner sc = new Scanner(f)) {
 				while (sc.hasNextLine()) {
@@ -196,6 +229,7 @@ public class Bombo extends JFrame {
 					} else if (linea.startsWith("BINGO:")) {
 						leido = true;
 						JOptionPane.showMessageDialog(null, "¡" + linea.substring(6) + " ha hecho BINGO!");
+						newnumber.setEnabled(false);
 					} else if (linea.startsWith("COMPROBANDO:")) {
 						leido = true;
 						String[] p = linea.split(":");
@@ -206,11 +240,16 @@ public class Bombo extends JFrame {
 						JOptionPane.showMessageDialog(null, "¡" + p[1] + " ha fallado la pregunta! El juego continúa.");
 					}
 				}
-			} catch (FileNotFoundException ignored) { }
+			} catch (FileNotFoundException ex) { 
+                System.err.println("ERROR: No se encontró el archivo de eventos (" + RUTA_EVENTOS + ") para leer. Detalle: " + ex.getMessage());
+            }
 
+			// Si se ha leído algo, se vacía el archivo.
 			if (leido) {
 				try (PrintWriter pw = new PrintWriter(RUTA_EVENTOS)) { /* vaciar */ }
-				catch (FileNotFoundException ignored) { }
+				catch (FileNotFoundException ex) { 
+                    System.err.println("ERROR: No se pudo vaciar el archivo de eventos. Detalle: " + ex.getMessage());
+                }
 			}
 		});
 		timer.start();
