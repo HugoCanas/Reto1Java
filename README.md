@@ -26,4 +26,4 @@ El proyecto está organizado de la siguiente manera:
 ## Tecnologías Utilizadas
 
 *   **Lenguaje de Programación:** Java
-*   **Otras Librerías/Frameworks:** [Añade aquí cualquier librería o framework que utilices]
+
