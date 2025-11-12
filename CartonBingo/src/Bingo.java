@@ -2,6 +2,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -24,6 +25,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 import java.awt.GridLayout;
+
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -80,6 +84,7 @@ public class Bingo extends JFrame {
 	private JPanel panel_1;
 	private Color colorOriginal;
 	private JDialog avisoActual;
+	private String [][]preguntasRespuestas;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -255,7 +260,7 @@ public class Bingo extends JFrame {
 
 		pedirIPServidor();
 		pedirNombreJugador();
-
+		cargarPreguntas();
 
 		llenarArrayNumeros(arrayNumeros);
 		llenarArrayBotones(arrayBotones);
@@ -498,22 +503,52 @@ public class Bingo extends JFrame {
 	        System.err.println("[ERROR] al escribir BLOQUEAR_BOTON: " + ex.getMessage());
 	    }
 	    
-	    String pregunta = "¿Cuántos litros de agua se necesitan para producir 1 kg de carne de vaca?";
-	    String[] opciones = {"500 L", "5.000 L", "15.000 L"};
-	    int respuestaCorrecta = 2;
+	    int indice = (int)(Math.random() * preguntasRespuestas.length);
+	    String pregunta = preguntasRespuestas[indice][0];
 
-	    int respuesta = JOptionPane.showOptionDialog(
+	    // === NUEVO CÓDIGO AQUÍ ===
+	    String[] opts = new String[4];
+	    int n = 0;
+	    for (int i = 1; i <= 4; i++)
+	        if (preguntasRespuestas[indice][i] != null && !preguntasRespuestas[indice][i].isEmpty())
+	            opts[n++] = preguntasRespuestas[indice][i];
+	    opts = java.util.Arrays.copyOf(opts, n);
+
+	    int correcta = Integer.parseInt(preguntasRespuestas[indice][5]);
+	    barajarArray(opts);
+	    int nuevaCorrecta = java.util.Arrays.asList(opts).indexOf(preguntasRespuestas[indice][correcta + 1]);
+
+	    JPanel panelOpciones = new JPanel();
+	    panelOpciones.setLayout(new BoxLayout(panelOpciones, BoxLayout.Y_AXIS));
+	    ButtonGroup grupo = new ButtonGroup();
+	    JRadioButton[] radios = new JRadioButton[opts.length];
+
+	    for (int i = 0; i < opts.length; i++) {
+	        radios[i] = new JRadioButton(opts[i]);
+	        grupo.add(radios[i]);
+	        panelOpciones.add(radios[i]);
+	    }
+	    radios[0].setSelected(true); // opción por defecto
+
+	    int resultado = JOptionPane.showConfirmDialog(
 	            this,
-	            pregunta,
-	            "Pregunta de Sostenibilidad - " + tipo,
-	            JOptionPane.DEFAULT_OPTION,
-	            JOptionPane.QUESTION_MESSAGE,
-	            null,
-	            opciones,
-	            opciones[0]
+	            new Object[]{pregunta, panelOpciones},
+	            "Pregunta - " + tipo,
+	            JOptionPane.OK_CANCEL_OPTION,
+	            JOptionPane.QUESTION_MESSAGE
 	    );
 
-	    boolean acierto = (respuesta == respuestaCorrecta);
+	    // Detectar cuál está seleccionado
+	    int resp = -1;
+	    for (int i = 0; i < radios.length; i++) {
+	        if (radios[i].isSelected()) {
+	            resp = i;
+	            break;
+	        }
+	    }
+	    if (resultado != JOptionPane.OK_OPTION) resp = -1; // Canceló
+
+	    boolean acierto = (resp == nuevaCorrecta);
 
 	    try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
 	        if (acierto) {
@@ -869,4 +904,197 @@ public class Bingo extends JFrame {
 			timerAviso.start();
 		});
 	}
+	
+	 private void cargarPreguntas() {
+		   	preguntasRespuestas = new String[20][7];
+		   	
+		   	//Pregunta 1 VERDADERO/FALSO
+		   	preguntasRespuestas[0][0] = "Los stakeholders influyen en las decisiones de sostenibilidad de una empresa.";
+		   	preguntasRespuestas[0][1] = "Verdadero";
+		   	preguntasRespuestas[0][2] = "Falso";
+		   	preguntasRespuestas[0][3] = null;
+		   	preguntasRespuestas[0][4] = null;
+		   	preguntasRespuestas[0][5] = "0";
+		   	preguntasRespuestas[0][6] = null;
+		   	
+		   	//Pregunta 2 VERDADERO/FALSO
+		   	preguntasRespuestas[1][0] = "Los criterios ambientales evalúan el impacto de la actividad empresarial en el medioambiente y la gestión de recursos naturales.";
+		   	preguntasRespuestas[1][1] = "Verdadero";
+		   	preguntasRespuestas[1][2] = "Falso";
+		   	preguntasRespuestas[1][3] = null;
+		   	preguntasRespuestas[1][4] = null;
+		   	preguntasRespuestas[1][5] = "0";
+		   	preguntasRespuestas[1][6] = null;
+		   	
+		   	//Pregunta 3 VERDADERO/FALSO
+		   	preguntasRespuestas[2][0] = "Un solo correo electrónico o un mensaje en la nube no genera ninguna huella de carbono, ya que no se imprime en papel.";
+		   	preguntasRespuestas[2][1] = "Falso";
+		   	preguntasRespuestas[2][2] = "Verdadero";
+		   	preguntasRespuestas[2][3] = null;
+		   	preguntasRespuestas[2][4] = null;
+		   	preguntasRespuestas[2][5] = "0";
+		   	preguntasRespuestas[2][6] = null;
+		  
+		   	//Pregunta 4 VERDADERO/FALSO
+		   	preguntasRespuestas[3][0] = "Mantener muchas aplicaciones abiertas en segundo plano puede provocar más consumo de energía.";
+		   	preguntasRespuestas[3][1] = "Verdadero";
+		   	preguntasRespuestas[3][2] = "Falso";
+		   	preguntasRespuestas[3][3] = null;
+		   	preguntasRespuestas[3][4] = null;
+		   	preguntasRespuestas[3][5] = "0";
+		   	preguntasRespuestas[3][6] = null;
+		   	
+		   	//Pregunta 5 VERDADERO/FALSO
+		   	preguntasRespuestas[4][0] = "La sostenibilidad empresarial es un proyecto puntual y finito que se ejecuta una vez y se termina, no es un proceso continuo.";
+		   	preguntasRespuestas[4][1] = "Falso";
+		   	preguntasRespuestas[4][2] = "Verdadero";
+		   	preguntasRespuestas[4][3] = null;
+		   	preguntasRespuestas[4][4] = null;
+		   	preguntasRespuestas[4][5] = "0";
+		   	preguntasRespuestas[4][6] = null;
+		   	
+		   	//Pregunta 6
+		   	preguntasRespuestas[5][0] = "¿Cuántos Objetivos de Desarrollo Sostenible (ODS) establece la Agenda 2030?";
+		   	preguntasRespuestas[5][1] = "17";
+		   	preguntasRespuestas[5][2] = "15";
+		   	preguntasRespuestas[5][3] = "20";
+		   	preguntasRespuestas[5][4] = "25";
+		   	preguntasRespuestas[5][5] = "0";
+		   	preguntasRespuestas[5][6] = null;
+		   	
+		   	//Pregunta 7
+		   	preguntasRespuestas[6][0] = "¿Quiénes son los stakeholders?";
+		   	preguntasRespuestas[6][1] = "Todas las personas o grupos afectados por la actividad de una empresa";
+		   	preguntasRespuestas[6][2] = "Los empleados que trabajan en una empresa";
+		   	preguntasRespuestas[6][3] = "La competencia de una empresa";
+		   	preguntasRespuestas[6][4] = "Los clientes de una empresa";
+		   	preguntasRespuestas[6][5] = "0";
+		   	preguntasRespuestas[6][6] = null;
+		   	
+		   	//Pregunta 8
+		   	preguntasRespuestas[7][0] = "¿Qué práctica ayuda a disminuir el consumo eléctrico de un ordenador?";
+		   	preguntasRespuestas[7][1] = "Ajustar el Ahorro de energía y gestionar del brillo";
+		   	preguntasRespuestas[7][2] = "Aumentar la potencia del procesador constantemente";
+		   	preguntasRespuestas[7][3] = "Mantener encendido el equipo todo el día";
+		   	preguntasRespuestas[7][4] = "Utilizar siempre la máxima velocidad del ventilador";
+		   	preguntasRespuestas[7][5] = "0";
+		   	preguntasRespuestas[7][6] = null;
+		   	
+		   	//Pregunta 9
+		   	preguntasRespuestas[8][0] = "¿Qué acción contribuye directamente a reducir los RAEE (Residuos de Aparatos Eléctricos y Electrónicos)?";
+		   	preguntasRespuestas[8][1] = "Reparar y actualizar componentes de dispositivos existentes para extender su vida útil";
+		   	preguntasRespuestas[8][2] = "Comprar nuevos dispositivos cada 12 meses para permanecer actualizado en tecnología";
+		   	preguntasRespuestas[8][3] = "Desechar dispositivos electrónicos en la basura común cuando ya no funcionan";
+		   	preguntasRespuestas[8][4] = "Acumular dispositivos electrónicos viejos en casa sin uso";
+		   	preguntasRespuestas[8][5] = "0";
+		   	preguntasRespuestas[8][6] = null;
+		   	
+		   	//Pregunta 10
+		   	preguntasRespuestas[9][0] = "Cuando un equipo informático se recicla correctamente, ¿cuál es el beneficio principal?";
+		   	preguntasRespuestas[9][1] = "Recuperar materiales útiles y reducir la contaminación";
+		   	preguntasRespuestas[9][2] = "Aumentar la cantidad de residuos generados para su tratamiento";
+		   	preguntasRespuestas[9][3] = "Garantizar que todos los componentes se destruyan por completo";
+		   	preguntasRespuestas[9][4] = "Evitar que el equipo pueda ser reutilizado de cualquier forma";
+		   	preguntasRespuestas[9][5] = "0";
+		   	preguntasRespuestas[9][6] = null;
+		   	
+		   	//Pregunta 11
+		   	preguntasRespuestas[10][0] = "Cuando hablamos de criterios ASG…";
+		   	preguntasRespuestas[10][1] = "Nos referimos a criterios ambientales, sociales y de gobernanza";
+		   	preguntasRespuestas[10][2] = "Las empresas los suelen poner en práctica de forma independiente";
+		   	preguntasRespuestas[10][3] = "Las decisiones que se tomen al aplicarnos solo tienen un efecto local";
+		   	preguntasRespuestas[10][4] = "Todas las respuestas son correctas";
+		   	preguntasRespuestas[10][5] = "0";
+		   	preguntasRespuestas[10][6] = null;
+		   	
+		   	//Pregunta 12
+		   	preguntasRespuestas[11][0] = "¿Cuáles son las 5 'P' (pilares) del desarrollo sostenible?";
+		   	preguntasRespuestas[11][1] = "Personas, Planeta, Prosperidad, Paz y Participación";
+		   	preguntasRespuestas[11][2] = "Política, Productividad, Personas, Paz y Planificación";
+		   	preguntasRespuestas[11][3] = "Planeta, Petróleo, Personas, Producción y Política";
+		   	preguntasRespuestas[11][4] = "Personas, Promoción, Prosperidad, Planos y Planificación";
+		   	preguntasRespuestas[11][5] = "0";
+		   	preguntasRespuestas[11][6] = null;
+		   	
+		   	//Pregunta 13 IMAGEN
+		   	preguntasRespuestas[12][0] = "¿A cuál de las siguientes ODS pertenece esta imagen?";
+		   	preguntasRespuestas[12][1] = "Acción por el clima";
+		   	preguntasRespuestas[12][2] = "Vida de Ecosistemas Terrestres";
+		   	preguntasRespuestas[12][3] = "Salud y Bienestar";
+		   	preguntasRespuestas[12][4] = "Ciudades y Comunidades Sostenibles";
+		   	preguntasRespuestas[12][5] = "0";
+		   	preguntasRespuestas[12][6] = "imagenes/clima.png";
+		   	
+		   	//Pregunta 14 IMAGEN
+		   	preguntasRespuestas[13][0] = "¿A cuál de las siguientes ODS pertenece esta imagen?";
+		   	preguntasRespuestas[13][1] = "Agua Limpia y Saneamiento";
+		   	preguntasRespuestas[13][2] = "Vida Submarina";
+		   	preguntasRespuestas[13][3] = "Salud y Bienestar";
+		   	preguntasRespuestas[13][4] = "Producción y consumo responsable";
+		   	preguntasRespuestas[13][5] = "0";
+		   	preguntasRespuestas[13][6] = "imagenes/agua.png";
+		   	
+		   	//Pregunta 15
+		   	preguntasRespuestas[14][0] = "¿Por qué es relevante la eficiencia del código en proyectos grandes?";
+		   	preguntasRespuestas[14][1] = "Una mayor eficiencia reduce el consumo de recursos en miles de dispositivos";
+		   	preguntasRespuestas[14][2] = "La eficiencia solo afecta la legibilidad del código";
+		   	preguntasRespuestas[14][3] = "El desempeño no influye en el impacto ambiental";
+		   	preguntasRespuestas[14][4] = "Los recursos consumidos por el software son siempre los mismos, optimizado o no";
+		   	preguntasRespuestas[14][5] = "0";
+		   	preguntasRespuestas[14][6] = null;
+		   	
+		   	//Pregunta 16
+		   	preguntasRespuestas[15][0] = "¿Qué stakeholders son los que aportan capital para financiar la empresa esperando una rentabilidad futura?";
+		   	preguntasRespuestas[15][1] = "Inversores";
+		   	preguntasRespuestas[15][2] = "Clientes";
+		   	preguntasRespuestas[15][3] = "Medios de comunicación";
+		   	preguntasRespuestas[15][4] = "Empleados";
+		   	preguntasRespuestas[15][5] = "0";
+		   	preguntasRespuestas[15][6] = null;
+		   	
+		   	//Pregunta 17
+		   	preguntasRespuestas[16][0] = "¿Qué ventaja ecológica se atribuye a la computación en la nube?";
+		   	preguntasRespuestas[16][1] = "Aprovecha mejor los recursos mediante infraestructura compartida";
+		   	preguntasRespuestas[16][2] = "Reduce por completo la necesidad de servidores físicos";
+		   	preguntasRespuestas[16][3] = "Elimina la necesidad de mantenimiento energético";
+		   	preguntasRespuestas[16][4] = "Disminuye automáticamente la huella de carbono a cero";
+		   	preguntasRespuestas[16][5] = "0";
+		   	preguntasRespuestas[16][6] = null;
+		   	
+		   	//Pregunta 18
+		   	preguntasRespuestas[17][0] = "¿Qué contribuye a que los centros de datos sean más sostenibles?";
+		   	preguntasRespuestas[17][1] = "Mejorar sistemas de refrigeración y gestión térmica";
+		   	preguntasRespuestas[17][2] = "Instalar más servidores para evitar saturación";
+		   	preguntasRespuestas[17][3] = "Mantener temperaturas elevadas para ahorrar energía";
+		   	preguntasRespuestas[17][4] = "Apagar servidores de forma aleatoria";
+		   	preguntasRespuestas[17][5] = "0";
+		   	preguntasRespuestas[17][6] = null;
+		   	
+		   	//Pregunta 19
+		   	preguntasRespuestas[18][0] = "¿Qué papel tienen las certificaciones energéticas en dispositivos?";
+		   	preguntasRespuestas[18][1] = "Indican que el equipo consume menos energía en condiciones normales";
+		   	preguntasRespuestas[18][2] = "Garantizan que el dispositivo es más potente";
+		   	preguntasRespuestas[18][3] = "Aseguran que el dispositivo tiene mayor vida útil";
+		   	preguntasRespuestas[18][4] = "Determinan el costo del dispositivo en el mercado";
+		   	preguntasRespuestas[18][5] = "0";
+		   	preguntasRespuestas[18][6] = null;
+		   	
+		   	//Pregunta 20
+		   	preguntasRespuestas[19][0] = "¿Cómo puede una empresa reducir el consumo energético durante las compilaciones de software?";
+		   	preguntasRespuestas[19][1] = "Programando compilaciones solo cuando se detecten cambios relevantes";
+		   	preguntasRespuestas[19][2] = "Compilando el proyecto completo cada hora";
+		   	preguntasRespuestas[19][3] = "Ejecutando compilaciones automáticas 24/7";
+		   	preguntasRespuestas[19][4] = "Creando múltiples servidores dedicados solo a compilar";
+		   	preguntasRespuestas[19][5] = "0";
+		   	preguntasRespuestas[19][6] = null;
+		   }
+	 
+	 private static void barajarArray(String[] a) {
+		    for (int i = a.length - 1; i > 0; i--) {
+		        int j = (int)(Math.random() * (i + 1));
+		        String tmp = a[i];
+		        a[i] = a[j];
+		        a[j] = tmp;
+		    }
+		}
 }
