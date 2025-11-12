@@ -62,7 +62,7 @@ public class Bombo extends JFrame {
 		JPanel numeros = new JPanel();
 		numeros.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		numeros.setBackground(new Color(192, 192, 192));
-		numeros.setBounds(10, 24, 492, 426);
+		numeros.setBounds(10, 63, 492, 387);
 		contentPane.add(numeros);
 		numeros.setLayout(new GridLayout(9, 10, 0, 0));
 
@@ -76,7 +76,7 @@ public class Bombo extends JFrame {
 		JPanel control = new JPanel();
 		control.setBackground(new Color(192, 192, 192));
 		control.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		control.setBounds(521, 24, 351, 426);
+		control.setBounds(521, 11, 351, 439);
 		contentPane.add(control);
 		control.setLayout(null);
 
@@ -130,6 +130,12 @@ public class Bombo extends JFrame {
 		lblBolaAnterior.setHorizontalAlignment(SwingConstants.CENTER);
 		lblBolaAnterior.setBounds(241, 298, 100, 14);
 		control.add(lblBolaAnterior);
+		
+		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
+		lblNewLabel_1.setForeground(Color.BLACK);
+		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
+		lblNewLabel_1.setBounds(10, 11, 311, 63);
+		contentPane.add(lblNewLabel_1);
 
 		arrayNumeros = new int[90];
 		
