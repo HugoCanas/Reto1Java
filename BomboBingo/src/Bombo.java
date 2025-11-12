@@ -28,6 +28,12 @@ import java.awt.Font;
 public class Bombo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	// ✅ CONSTANTE CON LA RUTA BASE
+	private static final String RUTA_CARPETA = "C:\\BingoCompartido";
+	private static final String RUTA_BOMBO = RUTA_CARPETA + "\\bombo_bingo.txt";
+	private static final String RUTA_LINEA = RUTA_CARPETA + "\\linea_estado.txt";
+	private static final String RUTA_EVENTOS = RUTA_CARPETA + "\\eventos_bingo.txt";
+	
 	private JPanel contentPane;
 	private JButton newnumber;
 	private int[] arrayNumeros;
@@ -40,7 +46,20 @@ public class Bombo extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		new File("C:/BingoCompartido").mkdirs();
+		// ✅ DEBUG: Verificar la ruta
+		System.out.println("=== DEPURACIÓN DE RUTAS ===");
+		System.out.println("RUTA_CARPETA definida: " + RUTA_CARPETA);
+		System.out.println("RUTA_BOMBO definida: " + RUTA_BOMBO);
+		
+		File carpeta = new File(RUTA_CARPETA);
+		System.out.println("Ruta absoluta real: " + carpeta.getAbsolutePath());
+		System.out.println("¿Carpeta existe? " + carpeta.exists());
+		
+		boolean creada = carpeta.mkdirs();
+		System.out.println("Carpeta creada o ya existía: " + creada);
+		System.out.println("¿Ahora existe? " + carpeta.exists());
+		System.out.println("========================\n");
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -143,14 +162,54 @@ public class Bombo extends JFrame {
 		registrarEventos();
 		monitorearEventos();
 		
-		File f = new File("C:/BingoCompartido/bombo_bingo.txt");
-		if (f.exists()) f.delete();
-		
-		// Resetear estado de línea al iniciar
-		try (PrintWriter pw = new PrintWriter(new FileWriter("C:/BingoCompartido/linea_estado.txt"))) {
-		    pw.println("PENDIENTE");
+		// ✅ CREAR LA CARPETA Y LOS ARCHIVOS
+		try {
+			File carpeta = new File(RUTA_CARPETA);
+			System.out.println("\n=== EN CONSTRUCTOR ===");
+			System.out.println("Intentando crear carpeta en: " + carpeta.getAbsolutePath());
+			
+			if (!carpeta.exists()) {
+				boolean creada = carpeta.mkdirs();
+				System.out.println("Carpeta creada: " + creada);
+			} else {
+				System.out.println("Carpeta ya existe");
+			}
+			
+			// Crear/resetear bombo_bingo.txt
+			File archivoBombo = new File(RUTA_BOMBO);
+			System.out.println("Creando archivo bombo en: " + archivoBombo.getAbsolutePath());
+			try (PrintWriter pw = new PrintWriter(archivoBombo)) {
+				pw.println("0"); // Número inicial
+				pw.println(""); // Lista vacía de números
+				System.out.println("✓ Archivo bombo_bingo.txt creado exitosamente");
+			}
+			
+			// Resetear estado de línea
+			File archivoLinea = new File(RUTA_LINEA);
+			System.out.println("Creando archivo línea en: " + archivoLinea.getAbsolutePath());
+			try (PrintWriter pw = new PrintWriter(archivoLinea)) {
+				pw.println("PENDIENTE");
+				System.out.println("✓ Archivo linea_estado.txt creado exitosamente");
+			}
+			
+			// Crear archivo de eventos si no existe
+			File archivoEventos = new File(RUTA_EVENTOS);
+			System.out.println("Creando archivo eventos en: " + archivoEventos.getAbsolutePath());
+			if (!archivoEventos.exists()) {
+				archivoEventos.createNewFile();
+				System.out.println("✓ Archivo eventos_bingo.txt creado exitosamente");
+			} else {
+				System.out.println("✓ Archivo eventos_bingo.txt ya existe");
+			}
+			System.out.println("======================\n");
+			
 		} catch (IOException e) {
-		    e.printStackTrace();
+			System.err.println("❌ ERROR al crear archivos: " + e.getMessage());
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, 
+				"Error al crear archivos en C:/BingoCompartido\n" +
+				"Verifica los permisos o ejecuta como administrador", 
+				"Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -194,6 +253,7 @@ public class Bombo extends JFrame {
 			
 		}
 	
+	
 		public void numeroAnterior()
 		{
 			if(cont > 0) {
@@ -202,10 +262,15 @@ public class Bombo extends JFrame {
 		}
 		
 		public void guardarNumero() {
-
-			String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";
-
-		    try (PrintWriter pw = new PrintWriter(new File(rutaArchivo))) {
+		    // ✅ DEPURACIÓN COMPLETA
+		    System.out.println("\n=== GUARDANDO NÚMERO ===");
+		    System.out.println("RUTA_BOMBO constante: " + RUTA_BOMBO);
+		    
+		    File archivo = new File(RUTA_BOMBO);
+		    System.out.println("Ruta absoluta del archivo: " + archivo.getAbsolutePath());
+		    System.out.println("Directorio padre: " + archivo.getParent());
+		    
+		    try (PrintWriter pw = new PrintWriter(archivo)) {
 		        // Primera línea: número actual (el último que salió)
 		        if (cont > 0) {
 		            pw.println(arrayNumeros[cont - 1]);
@@ -221,17 +286,18 @@ public class Bombo extends JFrame {
 		            }
 		        }
 
-		        System.out.println("Estado guardado en: " + rutaArchivo);
+		        System.out.println("✓ Estado guardado correctamente");
+		        System.out.println("=======================\n");
 
 		    } catch (FileNotFoundException e) {
-		        System.err.println("Error al guardar: " + e.getMessage());
+		        System.err.println("❌ Error al guardar: " + e.getMessage());
+		        e.printStackTrace();
 		    }
 		}
 		
 		private void monitorearEventos() {
 		    Timer timer = new Timer(500, e -> {
-		        String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
-		        File f = new File(rutaArchivo);
+		        File f = new File(RUTA_EVENTOS);
 		        if (!f.exists()) {
 		            try {
 		                f.createNewFile();
@@ -270,7 +336,7 @@ public class Bombo extends JFrame {
 
 		            //Solo borra si se ha leído y procesado al menos un evento válido
 		            if (leido) {
-		                try (PrintWriter pw = new PrintWriter(rutaArchivo)) {
+		                try (PrintWriter pw = new PrintWriter(RUTA_EVENTOS)) {
 		                    // Vaciar archivo
 		                } catch (FileNotFoundException ex) {
 		                    ex.printStackTrace();
@@ -283,4 +349,3 @@ public class Bombo extends JFrame {
 		    timer.start();
 		}
 }
-

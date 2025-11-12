@@ -61,7 +61,7 @@ public class Bingo extends JFrame {
 	private JLabel lblNumeroActual;
 	private String nombreJugador;
 	private boolean esperandoValidacion = false;
-	private String tipoEventoPendiente = "";
+	//private String tipoEventoPendiente = "";
 	private boolean[] filaFallida = new boolean[5];
 	private int filaActualLinea = -1; // Guardar qué fila está siendo validada
 	private boolean lineaGlobalConfirmada = false; // Estado local del archivo compartido
@@ -462,7 +462,7 @@ public class Bingo extends JFrame {
 
 	    // Si es válido, proceder con la pregunta
 	    esperandoValidacion = true;
-	    tipoEventoPendiente = tipo;
+	    //tipoEventoPendiente = tipo;
 
 	    // Notificar al bombo que se está comprobando
 	    String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
