@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
@@ -12,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.Scanner;
 import java.awt.GridLayout;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 public class Bingo extends JFrame {
 
@@ -67,6 +70,7 @@ public class Bingo extends JFrame {
 	private boolean[] filaFallida = new boolean[5];
 	private int filaActualLinea = -1;
 	private boolean lineaGlobalConfirmada = false;
+	private boolean bingoGlobalConfirmado = false;
 	private String ipServidor;
 	private String ruta_Carpeta;
 	private String ruta_Bombo;
@@ -75,6 +79,7 @@ public class Bingo extends JFrame {
 	private long ultimaModificacionBombo = 0L; 
 	private JPanel panel_1;
 	private Color colorOriginal;
+	private JDialog avisoActual;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -260,6 +265,8 @@ public class Bingo extends JFrame {
 
 		iniciarMonitoreoArchivo();
 		monitorearEstadoLinea();
+		monitorearEstadoBingo();
+		monitorearEventosGlobales();
 		setEstadoLinea("PENDIENTE");
 	}
 
@@ -453,11 +460,8 @@ public class Bingo extends JFrame {
 
 		if (!valido) {
 			System.out.println("[DEBUG] " + tipo + " no válida - números no han salido");
-			JOptionPane.showMessageDialog(this, 
-					"¡" + tipo + " no válida! Algunos números aún no han salido del bombo.", 
-					"Aviso", 
-					JOptionPane.WARNING_MESSAGE);
-
+			mostrarAviso(tipo + " no válida",
+					"¡" + tipo + " no válida! Algunos números aún no han salido del bombo.");
 			desmarcarNumerosNoValidos();
 
 			if (tipo.equals("LINEA")) {
@@ -475,7 +479,7 @@ public class Bingo extends JFrame {
 
 		esperandoValidacion = true;
 
-		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos))) {
+		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
 			pw.println("COMPROBANDO:" + nombreJugador + ":" + tipo);
 			System.out.println("[DEBUG] Escrito: COMPROBANDO:" + nombreJugador + ":" + tipo);
 		} catch (IOException e) {
@@ -486,62 +490,82 @@ public class Bingo extends JFrame {
 	}
 
 	private void hacerPreguntaSostenibilidad(String tipo) {
-		String pregunta = "¿Cuántos litros de agua se necesitan para producir 1 kg de carne de vaca?";
-		String[] opciones = {"500 L", "5.000 L", "15.000 L"};
-		int respuestaCorrecta = 2;
+	    // Pedimos bloqueo al bombo
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
+	        pw.println("BLOQUEAR_BOTON");
+	        pw.flush();
+	    } catch (IOException ex) {
+	        System.err.println("[ERROR] al escribir BLOQUEAR_BOTON: " + ex.getMessage());
+	    }
+	    
+	    String pregunta = "¿Cuántos litros de agua se necesitan para producir 1 kg de carne de vaca?";
+	    String[] opciones = {"500 L", "5.000 L", "15.000 L"};
+	    int respuestaCorrecta = 2;
 
-		int respuesta = JOptionPane.showOptionDialog(
-				this,
-				pregunta,
-				"Pregunta de Sostenibilidad - " + tipo,
-				JOptionPane.DEFAULT_OPTION,
-				JOptionPane.QUESTION_MESSAGE,
-				null,
-				opciones,
-				opciones[0]
-				);
+	    int respuesta = JOptionPane.showOptionDialog(
+	            this,
+	            pregunta,
+	            "Pregunta de Sostenibilidad - " + tipo,
+	            JOptionPane.DEFAULT_OPTION,
+	            JOptionPane.QUESTION_MESSAGE,
+	            null,
+	            opciones,
+	            opciones[0]
+	    );
 
-		boolean acierto = (respuesta == respuestaCorrecta);
+	    boolean acierto = (respuesta == respuestaCorrecta);
 
-		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos))) {
-			if (acierto) {
-				pw.println(tipo + ":" + nombreJugador);
-				JOptionPane.showMessageDialog(this, "¡Acertaste! " + tipo + " válida.");
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
+	        if (acierto) {
+	            pw.println(tipo + ":" + nombreJugador);
+	            pw.flush();
 
-				if (tipo.equals("LINEA")) {
-					setEstadoLinea("CONFIRMADA:" + nombreJugador);
-					lineaGlobalConfirmada = true;
-					System.out.println("[DEBUG] Línea confirmada globalmente por " + nombreJugador);
-				}
+	            if (tipo.equals("LINEA")) {
+	                setEstadoLinea("CONFIRMADA:" + nombreJugador);
+	                lineaGlobalConfirmada = true;
+	                mostrarAviso("Línea validada", "¡Acertaste! LÍNEA válida.");
+	                System.out.println("[DEBUG] Línea confirmada globalmente por " + nombreJugador);
+	                
+	            } else if (tipo.equals("BINGO")) {
+	                mostrarAviso("¡BINGO GANADOR!", "¡Felicidades! Has ganado el BINGO.");
+	                desactivarBotones();
+	                System.out.println("[DEBUG] Bingo confirmado globalmente por " + nombreJugador);
+	            }
 
-			} else {
-				pw.println("FALLO:" + nombreJugador + ":" + tipo);
+	        } else {
+	            pw.println("FALLO:" + nombreJugador + ":" + tipo);
+	            pw.flush();
 
-				if (tipo.equals("LINEA")) {
-					JOptionPane.showMessageDialog(this, 
-							"¡Respuesta incorrecta! Esta línea ya no será válida para ti, pero puedes intentar con otra.", 
-							"Fallo", 
-							JOptionPane.ERROR_MESSAGE);
+	            if (tipo.equals("LINEA")) {
+	                mostrarAviso("Fallo en LÍNEA",
+	                        "¡Respuesta incorrecta! Esta línea ya no es válida, intenta con otra.");
 
-					if (filaActualLinea >= 0) {
-						filaFallida[filaActualLinea] = true;
-						System.out.println("[DEBUG] Fila " + filaActualLinea + " marcada como fallida para " + nombreJugador);
-					}
-					lineaEncontrada = false;
-					filaActualLinea = -1;
+	                if (filaActualLinea >= 0) {
+	                    filaFallida[filaActualLinea] = true;
+	                    System.out.println("[DEBUG] Fila " + filaActualLinea + " marcada como fallida para " + nombreJugador);
+	                }
+	                lineaEncontrada = false;
+	                filaActualLinea = -1;
 
-				} else if (tipo.equals("BINGO")) {
-					JOptionPane.showMessageDialog(this, 
-							"¡Respuesta incorrecta! Has perdido la oportunidad de ganar.", 
-							"Fallo", 
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		esperandoValidacion = false;
+	            } else if (tipo.equals("BINGO")) {
+	                mostrarAviso("Fallo en BINGO",
+	                        "¡Respuesta incorrecta! Has perdido la oportunidad de ganar.");
+	                desactivarBotones();
+	            }
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    
+	    // Liberamos el botón
+	    try (PrintWriter pwr = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
+	        pwr.println("DESBLOQUEAR_BOTON");
+	        pwr.flush();
+	    } catch (IOException ex) {
+	        System.err.println("[ERROR] al escribir DESBLOQUEAR_BOTON: " + ex.getMessage());
+	    }
+	    
+	    esperandoValidacion = false;
 	}
 
 	private void desmarcarNumerosNoValidos() {
@@ -689,17 +713,110 @@ public class Bingo extends JFrame {
 				lineaGlobalConfirmada = true;
 				String ganador = estado.substring(11);
 
-				if (!ganador.equals(nombreJugador)) {
-					JOptionPane.showMessageDialog(this, 
-							"¡" + ganador + " ha conseguido LÍNEA! Ya no se pueden hacer más líneas.", 
-							"Línea confirmada", 
-							JOptionPane.INFORMATION_MESSAGE);
+				if (!ganador.equalsIgnoreCase(nombreJugador)) {
+					mostrarAviso("Línea confirmada",
+							"¡" + ganador + " ha conseguido LÍNEA!\nYa no se pueden hacer más líneas.");
 				}
 
 				System.out.println("[DEBUG] Línea global confirmada. Jugador: " + nombreJugador + " ya no puede hacer líneas.");
 			}
 		});
 		timer.start();
+	}
+
+	private void monitorearEstadoBingo() {
+		Timer timer = new Timer(500, e -> {
+			String estado = obtenerEstadoBingo();
+			if (estado.startsWith("CONFIRMADA:") && !bingoGlobalConfirmado) {
+				bingoGlobalConfirmado = true;
+				String ganador = estado.substring(11);
+				if (!ganador.equalsIgnoreCase(nombreJugador)) {
+					mostrarAviso("Bingo confirmado",
+							"¡" + ganador + " ha hecho BINGO!\nEl juego ha finalizado.");
+				}
+				desactivarBotones();          // opcional: bloquear cartón
+				System.out.println("[DEBUG] Bingo global confirmado. Jugador: " + nombreJugador);
+			}
+		});
+		timer.start();
+	}
+
+	private String obtenerEstadoBingo() {
+		File f = new File(ruta_Carpeta + "\\bingo_estado.txt");
+		if (!f.exists()) return "PENDIENTE";
+		try (Scanner sc = new Scanner(f)) {
+			return sc.hasNextLine() ? sc.nextLine().trim() : "PENDIENTE";
+		} catch (Exception e) {
+			return "PENDIENTE";
+		}
+	}
+
+	private void monitorearEventosGlobales() {
+	    // *** CAMBIO: Aumentar a 800ms para sincronización ***
+	    Timer timer = new Timer(800, e -> {
+	        File f = new File(ruta_Eventos);
+	        if (!f.exists() || f.length() == 0) return;
+
+	        try (Scanner sc = new Scanner(f)) {
+	            while (sc.hasNextLine()) {
+	                String linea = sc.nextLine().trim();
+	                if (linea.isEmpty()) continue;
+
+	                System.out.println("[DEBUG] " + nombreJugador + " leyó: " + linea);
+
+	                if (linea.startsWith("COMPROBANDO:")) {
+	                    String[] p = linea.split(":");
+	                    if (p.length >= 3) {
+	                        String jugador = p[1];
+	                        String tipo = p[2];
+
+	                        if (!jugador.equalsIgnoreCase(nombreJugador)) {
+	                            mostrarAviso("Comprobando " + tipo,
+	                                    "¡" + jugador + " ha hecho " + tipo + "!\nSe está comprobando...");
+	                        }
+	                    }
+	                }
+
+	                else if (linea.startsWith("FALLO:")) {
+	                    String[] p = linea.split(":");
+	                    if (p.length >= 3) {
+	                        String jugador = p[1];
+	                        String tipo = p[2];
+
+	                        if (!jugador.equalsIgnoreCase(nombreJugador)) {
+	                            mostrarAviso("Fallo en " + tipo,
+	                                    "¡" + jugador + " ha fallado la pregunta de " + tipo + "!");
+	                        }
+	                    }
+	                }
+
+	                else if (linea.startsWith("LINEA:")) {
+	                    String[] p = linea.split(":");
+	                    if (p.length >= 2) {
+	                        String jugador = p[1];
+	                        if (!jugador.equalsIgnoreCase(nombreJugador)) {
+	                            mostrarAviso("Línea confirmada",
+	                                    "¡" + jugador + " ha hecho LÍNEA!");
+	                        }
+	                    }
+	                }
+
+	                else if (linea.startsWith("BINGO:")) {
+	                    String[] p = linea.split(":");
+	                    if (p.length >= 2) {
+	                        String jugador = p[1];
+	                        if (!jugador.equalsIgnoreCase(nombreJugador)) {
+	                            mostrarAviso("Bingo confirmado",
+	                                    "¡" + jugador + " ha hecho BINGO!");
+	                        }
+	                    }
+	                }
+	            }
+	        } catch (Exception ex) {
+	            System.err.println("[ERROR] monitorearEventosGlobales: " + ex.getMessage());
+	        }
+	    });
+	    timer.start();
 	}
 
 	private String obtenerEstadoLinea() {
@@ -719,5 +836,37 @@ public class Bingo extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private javax.swing.Timer timerAviso;   // campo de clase, reutilizable
+
+	private void mostrarAviso(String titulo, String texto) {
+		SwingUtilities.invokeLater(() -> {
+			/* 1.  Cierra aviso anterior y para su Timer */
+			if (timerAviso != null) {
+				timerAviso.stop();
+			}
+			if (avisoActual != null && avisoActual.isDisplayable()) {
+				avisoActual.dispose();
+			}
+
+			/* 2.  Crea el nuevo aviso */
+			avisoActual = new JDialog(this, titulo, false);
+			avisoActual.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			avisoActual.add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
+			avisoActual.setSize(400, 120);
+			avisoActual.setLocationRelativeTo(this);
+			avisoActual.setVisible(true);
+
+			/* 3.  Timer nuevo: 5 s y luego cierra */
+			timerAviso = new javax.swing.Timer(4000, e -> {
+				if (avisoActual != null && avisoActual.isDisplayable()) {
+					avisoActual.dispose();
+				}
+				timerAviso.stop();
+			});
+			timerAviso.setRepeats(false);
+			timerAviso.start();
+		});
 	}
 }
