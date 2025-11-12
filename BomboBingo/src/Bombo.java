@@ -136,6 +136,13 @@ public class Bombo extends JFrame {
 		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
 		lblNewLabel_1.setBounds(10, 11, 311, 63);
 		contentPane.add(lblNewLabel_1);
+		
+		addWindowListener(new java.awt.event.WindowAdapter() {
+		    @Override
+		    public void windowClosing(java.awt.event.WindowEvent e) {
+		        vaciarBombo();
+		    }
+		});
 
 		arrayNumeros = new int[90];
 		
@@ -180,6 +187,16 @@ public class Bombo extends JFrame {
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo escribir en el archivo del bombo (" + RUTA_BOMBO + "). Detalle: " + ex.getMessage());
 		}
+	}
+	
+	private void vaciarBombo() {
+	    try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
+	        pw.println("--"); // 
+	        pw.println("");  // 
+	        System.out.println("[DEBUG] Archivo bombo_bingo.txt vaciado al cerrar.");
+	    } catch (FileNotFoundException ex) {
+	        System.err.println("ERROR: No se pudo vaciar el archivo del bombo. Detalle: " + ex.getMessage());
+	    }
 	}
 	
 	// GRUPO 2: LÓGICA DE BOMBO (GENERACIÓN DE NÚMEROS)

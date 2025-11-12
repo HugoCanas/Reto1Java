@@ -74,6 +74,7 @@ public class Bingo extends JFrame {
 	private String ruta_Eventos;
 	private long ultimaModificacionBombo = 0L; 
 	private JPanel panel_1;
+	private Color colorOriginal;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -120,6 +121,7 @@ public class Bingo extends JFrame {
 			}
 		});
 		btn1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		colorOriginal = btn1.getBackground();
 
 		btn2 = new JButton("New button");
 		panel.add(btn2);
@@ -548,7 +550,7 @@ public class Bingo extends JFrame {
 				int num = Integer.parseInt(boton.getText());
 				if (!numeroHaSalido(num)) {
 					boton.setEnabled(true);
-					boton.setBackground(null);
+					boton.setBackground(colorOriginal);
 				}
 			}
 		}
