@@ -28,6 +28,10 @@ public class Bingo extends JFrame {
 	public static final int NO_FIN = 0;
 	public static final int LINEA = 1;
 	public static final int BINGO = 2;
+	private static final String RUTA_CARPETA = "\\\\\\\\ipServidor\\BingoCompartido";
+	private static final String RUTA_BOMBO   = RUTA_CARPETA + "\\bombo_bingo.txt";
+	private static final String RUTA_LINEA   = RUTA_CARPETA + "\\linea_estado.txt";
+	private static final String RUTA_EVENTOS = RUTA_CARPETA + "\\eventos_bingo.txt";
 	private JPanel contentPane;
 	private JButton btn1;
 	private JButton btn2;
@@ -65,13 +69,12 @@ public class Bingo extends JFrame {
 	private boolean[] filaFallida = new boolean[5];
 	private int filaActualLinea = -1; // Guardar qué fila está siendo validada
 	private boolean lineaGlobalConfirmada = false; // Estado local del archivo compartido
+	private String ipServidor;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		new File("C:/BingoCompartido").mkdirs();
-
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -246,6 +249,7 @@ public class Bingo extends JFrame {
 		
 		
 		
+		pedirIPServidor();
 		pedirNombreJugador();
 
 		llenarArrayNumeros(arrayNumeros);
@@ -260,6 +264,31 @@ public class Bingo extends JFrame {
 		
 		monitorearEstadoLinea();
 
+	}
+	
+	private void pedirIPServidor() {
+	    boolean valido = false;
+	    while (!valido) {
+	        ipServidor = JOptionPane.showInputDialog(
+	            this,
+	            "Introduce la IP del servidor de juego:",
+	            "Conexión al servidor",
+	            JOptionPane.QUESTION_MESSAGE
+	        );
+
+	        if (ipServidor == null || ipServidor.trim().isEmpty()) {
+	            JOptionPane.showMessageDialog(null, "La IP no puede estar vacía.");
+	            continue;
+	        }
+
+	        // Validación básica de formato IP (opcional)
+	        if (!ipServidor.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")) {
+	            JOptionPane.showMessageDialog(null, "Formato de IP inválido.");
+	            continue;
+	        }
+
+	        valido = true;
+	    }
 	}
 
     private void pedirNombreJugador() {
@@ -465,8 +494,7 @@ public class Bingo extends JFrame {
 	    //tipoEventoPendiente = tipo;
 
 	    // Notificar al bombo que se está comprobando
-	    String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
-	    try (PrintWriter pw = new PrintWriter(new FileWriter(rutaArchivo))) {
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA_EVENTOS))) {
 	        pw.println("COMPROBANDO:" + nombreJugador + ":" + tipo);
 	        System.out.println("[DEBUG] Escrito: COMPROBANDO:" + nombreJugador + ":" + tipo);
 	    } catch (IOException e) {
@@ -512,8 +540,7 @@ public class Bingo extends JFrame {
 
 	    boolean acierto = (respuesta == respuestaCorrecta);
 
-	    String rutaArchivo = "C:/BingoCompartido/eventos_bingo.txt";
-	    try (PrintWriter pw = new PrintWriter(new FileWriter(rutaArchivo))) {
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA_EVENTOS))) {
 	        if (acierto) {
 	            pw.println(tipo + ":" + nombreJugador);
 	            JOptionPane.showMessageDialog(null, "¡Acertaste! " + tipo + " válida.");
@@ -620,7 +647,7 @@ public class Bingo extends JFrame {
 	}
 
 	private boolean numeroHaSalido(int num) {
-	    File archivo = new File("C:/BingoCompartido/bombo_bingo.txt");
+	    File archivo = new File(RUTA_BOMBO);
 	    if (!archivo.exists()) return false;
 
 	    try (Scanner sc = new Scanner(archivo)) {
@@ -647,7 +674,7 @@ public class Bingo extends JFrame {
 	}
 	
 	private String obtenerEstadoLinea() {
-	    File f = new File("C:/BingoCompartido/linea_estado.txt");
+	    File f = new File(RUTA_LINEA);
 	    if (!f.exists()) return "PENDIENTE";
 	    try (Scanner sc = new Scanner(f)) {
 	        return sc.hasNextLine() ? sc.nextLine().trim() : "PENDIENTE";
@@ -657,7 +684,7 @@ public class Bingo extends JFrame {
 	}
 	
 	private void setEstadoLinea(String estado) {
-	    try (PrintWriter pw = new PrintWriter(new FileWriter("C:/BingoCompartido/linea_estado.txt"))) {
+	    try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA_LINEA))) {
 	        pw.println(estado);
 	        System.out.println("[DEBUG] Estado de línea actualizado: " + estado);
 	    } catch (IOException e) {
@@ -688,7 +715,7 @@ public class Bingo extends JFrame {
 	}
 	
 	private void iniciarMonitoreoArchivo() {
-		String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";        
+		String rutaArchivo = RUTA_BOMBO;        
         // Timer que se ejecuta cada 1 segundo (1000 ms)
         Timer timer = new Timer(500, new ActionListener() {
             @Override
@@ -714,7 +741,7 @@ public class Bingo extends JFrame {
     public void cargarNumero() {
         int cont;
         
-        String rutaArchivo = "C:/BingoCompartido/bombo_bingo.txt";
+        String rutaArchivo = RUTA_BOMBO;
         
         File archivo = new File(rutaArchivo);
         if (!archivo.exists()) {
