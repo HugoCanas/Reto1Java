@@ -248,19 +248,19 @@ public class Bombo extends JFrame {
 					String linea = sc.nextLine();
 					if (linea.startsWith("LINEA:")) {
 						leido = true;
-						JOptionPane.showMessageDialog(null, "¡" + linea.substring(6) + " ha hecho LÍNEA!");
+						JOptionPane.showMessageDialog(this, "¡" + linea.substring(6) + " ha hecho LÍNEA!");
 					} else if (linea.startsWith("BINGO:")) {
 						leido = true;
-						JOptionPane.showMessageDialog(null, "¡" + linea.substring(6) + " ha hecho BINGO!");
+						JOptionPane.showMessageDialog(this, "¡" + linea.substring(6) + " ha hecho BINGO!");
 						newnumber.setEnabled(false);
 					} else if (linea.startsWith("COMPROBANDO:")) {
 						leido = true;
 						String[] p = linea.split(":");
-						JOptionPane.showMessageDialog(null, "¡" + p[1] + " ha hecho " + p[2] + "! Se está comprobando...");
+						JOptionPane.showMessageDialog(this, "¡" + p[1] + " ha hecho " + p[2] + "! Se está comprobando...");
 					} else if (linea.startsWith("FALLO:")) {
 						leido = true;
 						String[] p = linea.split(":");
-						JOptionPane.showMessageDialog(null, "¡" + p[1] + " ha fallado la pregunta! El juego continúa.");
+						JOptionPane.showMessageDialog(this, "¡" + p[1] + " ha fallado la pregunta! El juego continúa.");
 					}
 				}
 			} catch (FileNotFoundException ex) { 

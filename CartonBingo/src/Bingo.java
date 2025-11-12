@@ -276,11 +276,11 @@ public class Bingo extends JFrame {
 					);
 
 			if (ipServidor == null || ipServidor.trim().isEmpty()) {
-				JOptionPane.showMessageDialog(null, "La IP no puede estar vacía.");
+				JOptionPane.showMessageDialog(this, "La IP no puede estar vacía.");
 				continue;
 			}
 			if (!ipServidor.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")) {
-				JOptionPane.showMessageDialog(null, "Formato de IP inválido.");
+				JOptionPane.showMessageDialog(this, "Formato de IP inválido.");
 				continue;
 			}
 
@@ -297,11 +297,11 @@ public class Bingo extends JFrame {
 		while (!valido) {
 			nombreJugador = JOptionPane.showInputDialog("Introduce tu nombre:");
 			if (nombreJugador == null || nombreJugador.trim().isEmpty()) {
-				JOptionPane.showMessageDialog(null, "El nombre no puede estar vacío.");
+				JOptionPane.showMessageDialog(this, "El nombre no puede estar vacío.");
 				continue;
 			}
 			if (nombreRepetido(nombreJugador)) {
-				JOptionPane.showMessageDialog(null, "Ese nombre ya está en uso.");
+				JOptionPane.showMessageDialog(this, "Ese nombre ya está en uso.");
 			} else {
 				guardarNombre(nombreJugador);
 				valido = true;
@@ -453,7 +453,7 @@ public class Bingo extends JFrame {
 
 		if (!valido) {
 			System.out.println("[DEBUG] " + tipo + " no válida - números no han salido");
-			JOptionPane.showMessageDialog(null, 
+			JOptionPane.showMessageDialog(this, 
 					"¡" + tipo + " no válida! Algunos números aún no han salido del bombo.", 
 					"Aviso", 
 					JOptionPane.WARNING_MESSAGE);
@@ -506,7 +506,7 @@ public class Bingo extends JFrame {
 		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos))) {
 			if (acierto) {
 				pw.println(tipo + ":" + nombreJugador);
-				JOptionPane.showMessageDialog(null, "¡Acertaste! " + tipo + " válida.");
+				JOptionPane.showMessageDialog(this, "¡Acertaste! " + tipo + " válida.");
 
 				if (tipo.equals("LINEA")) {
 					setEstadoLinea("CONFIRMADA:" + nombreJugador);
@@ -518,7 +518,7 @@ public class Bingo extends JFrame {
 				pw.println("FALLO:" + nombreJugador + ":" + tipo);
 
 				if (tipo.equals("LINEA")) {
-					JOptionPane.showMessageDialog(null, 
+					JOptionPane.showMessageDialog(this, 
 							"¡Respuesta incorrecta! Esta línea ya no será válida para ti, pero puedes intentar con otra.", 
 							"Fallo", 
 							JOptionPane.ERROR_MESSAGE);
@@ -531,7 +531,7 @@ public class Bingo extends JFrame {
 					filaActualLinea = -1;
 
 				} else if (tipo.equals("BINGO")) {
-					JOptionPane.showMessageDialog(null, 
+					JOptionPane.showMessageDialog(this, 
 							"¡Respuesta incorrecta! Has perdido la oportunidad de ganar.", 
 							"Fallo", 
 							JOptionPane.ERROR_MESSAGE);
@@ -690,7 +690,7 @@ public class Bingo extends JFrame {
 				String ganador = estado.substring(11);
 
 				if (!ganador.equals(nombreJugador)) {
-					JOptionPane.showMessageDialog(null, 
+					JOptionPane.showMessageDialog(this, 
 							"¡" + ganador + " ha conseguido LÍNEA! Ya no se pueden hacer más líneas.", 
 							"Línea confirmada", 
 							JOptionPane.INFORMATION_MESSAGE);
