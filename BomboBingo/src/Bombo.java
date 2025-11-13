@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-
 import java.awt.Color;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.border.BevelBorder;
@@ -23,26 +22,27 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.awt.Font;
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
 
 public class Bombo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
 	private static final String RUTA_CARPETA = ".\\BingoCompartido";
-	private static final String RUTA_BOMBO   = RUTA_CARPETA + "\\bombo_bingo.txt";
-	private static final String RUTA_LINEA   = RUTA_CARPETA + "\\linea_estado.txt";
+	private static final String RUTA_BOMBO = RUTA_CARPETA + "\\bombo_bingo.txt";
+	private static final String RUTA_LINEA = RUTA_CARPETA + "\\linea_estado.txt";
 	private static final String RUTA_EVENTOS = RUTA_CARPETA + "\\eventos_bingo.txt";
 	private static final String RUTA_BINGO_ESTADO = RUTA_CARPETA + "\\bingo_estado.txt";
+	private static final String RUTA_NOMBRES = RUTA_CARPETA + "\\nombres_jugadores.txt";
 	private JDialog avisoActual;
 
 	private JPanel contentPane;
 	private JButton newnumber;
-	private int[] arrayNumeros; // Números ya salidos
-	private JButton[] botones; // Botones del cartón del bombo (1-90)
+	private int[] arrayNumeros;
+	private JButton[] botones;
 	private JLabel nuevoNumlabel;
 	private JLabel antNumlabel;
-	private int cont = 0; // Contador de números sacados
-
+	private int cont = 0;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(() -> {
@@ -105,7 +105,7 @@ public class Bombo extends JFrame {
 		nuevoNumlabel.setForeground(new Color(0, 0, 0));
 
 		JLabel BolaNueva = new JLabel("");
-		BolaNueva.setIcon(new ImageIcon(getClass().getResource("/images/bolaverde.png")));
+		BolaNueva.setIcon(new ImageIcon(RUTA_CARPETA + "/imagenes/bolaverde.png"));
 		BolaNueva.setBounds(0, 0, 251, 250);
 		NuevaPane.add(BolaNueva);
 
@@ -122,15 +122,15 @@ public class Bombo extends JFrame {
 		AnteriorPane.add(antNumlabel);
 
 		JLabel BolaAnterior = new JLabel("");
-		BolaAnterior.setIcon(new ImageIcon(getClass().getResource("/images/bolamorada.png")));
+		BolaAnterior.setIcon(new ImageIcon(RUTA_CARPETA + "/imagenes/bolamorada.png"));
 		BolaAnterior.setBounds(0, 0, 100, 100);
 		AnteriorPane.add(BolaAnterior);
 
-		JLabel lblNewLabel = new JLabel("Bola Nueva");
-		lblNewLabel.setFont(new Font("Verdana", Font.BOLD, 20));
-		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(10, 11, 250, 24);
-		control.add(lblNewLabel);
+		JLabel lblBolaNueva = new JLabel("Bola Nueva");
+		lblBolaNueva.setFont(new Font("Verdana", Font.BOLD, 20));
+		lblBolaNueva.setHorizontalAlignment(SwingConstants.CENTER);
+		lblBolaNueva.setBounds(10, 11, 250, 24);
+		control.add(lblBolaNueva);
 
 		JLabel lblBolaAnterior = new JLabel("Bola Anterior");
 		lblBolaAnterior.setFont(new Font("Verdana", Font.BOLD, 12));
@@ -138,11 +138,13 @@ public class Bombo extends JFrame {
 		lblBolaAnterior.setBounds(241, 298, 100, 14);
 		control.add(lblBolaAnterior);
 
-		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
-		lblNewLabel_1.setForeground(Color.BLACK);
-		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
-		lblNewLabel_1.setBounds(10, 11, 311, 63);
-		contentPane.add(lblNewLabel_1);
+		JLabel lblAlmingo = new JLabel("ALMINGO");
+		lblAlmingo.setForeground(Color.BLACK);
+		lblAlmingo.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
+		lblAlmingo.setBounds(10, 11, 311, 63);
+		contentPane.add(lblAlmingo);
+		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(RUTA_CARPETA + "/imagenes/bolaverde.png"));
 
 		addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
@@ -153,12 +155,11 @@ public class Bombo extends JFrame {
 
 		arrayNumeros = new int[90];
 
-		crearEstructuraArchivos(); 
+		crearEstructuraArchivos();
 
 		registrarEventos();
 		monitorearEventos();
 	}
-
 
 	// GRUPO 1: LÓGICA DE ARCHIVOS
 
@@ -172,26 +173,25 @@ public class Bombo extends JFrame {
 		}
 
 		try {
-			if (new File(RUTA_BOMBO).createNewFile()) {}
-			if (new File(RUTA_LINEA).createNewFile()) {}
-			if (new File(RUTA_EVENTOS).createNewFile()) {}
-			if (new File(RUTA_BINGO_ESTADO).createNewFile()) {}
-		} catch (IOException ex) { 
+			new File(RUTA_BOMBO).createNewFile();
+			new File(RUTA_LINEA).createNewFile();
+			new File(RUTA_EVENTOS).createNewFile();
+			new File(RUTA_BINGO_ESTADO).createNewFile();
+			new File(RUTA_NOMBRES).createNewFile();
+		} catch (IOException ex) {
 			System.err.println("ERROR: Fallo al crear un archivo inicial. Detalle: " + ex.getMessage());
 		}
 	}
 
 	private void guardarNumero() {
 		try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
-			//Último número sacado
-			pw.println(cont > 0 ? arrayNumeros[cont - 1] : "0"); 
-
-			//Lista de todos los números sacados separados por comas
+			pw.println(cont > 0 ? arrayNumeros[cont - 1] : "0");
 			for (int i = 0; i < cont; i++) {
 				pw.print(arrayNumeros[i]);
-				if (i < cont - 1) pw.print(",");
+				if (i < cont - 1)
+					pw.print(",");
 			}
-			pw.println(); 
+			pw.println();
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo escribir en el archivo del bombo (" + RUTA_BOMBO + "). Detalle: " + ex.getMessage());
 		}
@@ -199,16 +199,14 @@ public class Bombo extends JFrame {
 
 	private void vaciarBombo() {
 		try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
-			pw.println("--"); // 
-			pw.println("");  // 
-			System.out.println("[DEBUG] Archivo bombo_bingo.txt vaciado al cerrar.");
+			pw.println("--");
+			pw.println("");
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo vaciar el archivo del bombo. Detalle: " + ex.getMessage());
 		}
 
 		try (PrintWriter pw = new PrintWriter(new File(RUTA_BINGO_ESTADO))) {
-			pw.print("");   // dejarlo vacío
-			System.out.println("[DEBUG] bingo_estado.txt vaciado al cerrar.");
+			pw.print("");
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo vaciar bingo_estado.txt. Detalle: " + ex.getMessage());
 		}
@@ -218,20 +216,22 @@ public class Bombo extends JFrame {
 
 	private void registrarEventos() {
 		newnumber.addActionListener(e -> {
-			nuevoNumero(); 
-			if (cont == 90) newnumber.setEnabled(false);
+			nuevoNumero();
+			if (cont == 90)
+				newnumber.setEnabled(false);
 		});
 	}
 
 	private void nuevoNumero() {
-		if (cont >= 90) return; 
+		if (cont >= 90)
+			return;
 
 		int num;
 		boolean repetido;
 		do {
 			num = (int) (Math.random() * 90) + 1;
 			repetido = false;
-			for (int j = 0; j < cont; j++) { 
+			for (int j = 0; j < cont; j++) {
 				if (arrayNumeros[j] == num) {
 					repetido = true;
 					break;
@@ -248,104 +248,91 @@ public class Bombo extends JFrame {
 	}
 
 	private void numeroAnterior() {
-		if (cont > 0) antNumlabel.setText(String.valueOf(arrayNumeros[cont - 1]));
+		if (cont > 0)
+			antNumlabel.setText(String.valueOf(arrayNumeros[cont - 1]));
 	}
 
 	// GRUPO 3: MONITOREO DE EVENTOS DE JUGADORES
 
-	private volatile boolean procesandoEventos = false; // Añadir este campo a la clase
+	private volatile boolean procesandoEventos = false;
 
 	private void monitorearEventos() {
-	    Timer timer = new Timer(1000, e -> {
-	        // Evitar procesamiento simultáneo
-	        if (procesandoEventos) return;
-	        
-	        File f = new File(RUTA_EVENTOS);
-	        if (!f.exists() || f.length() == 0) return;
+		Timer timer = new Timer(1000, e -> {
+			if (procesandoEventos)
+				return;
 
-	        procesandoEventos = true;
-	        StringBuilder eventosLeidos = new StringBuilder();
-	        boolean hayEventos = false;
+			File f = new File(RUTA_EVENTOS);
+			if (!f.exists() || f.length() == 0)
+				return;
 
-	        // 1. LEER todos los eventos
-	        try (Scanner sc = new Scanner(f)) {
-	            while (sc.hasNextLine()) {
-	                String linea = sc.nextLine().trim();
-	                if (linea.isEmpty()) continue;
-	                
-	                hayEventos = true;
-	                eventosLeidos.append(linea).append("\n");
-	                System.out.println("[DEBUG BOMBO] Leyendo evento: " + linea);
-	            }
-	        } catch (FileNotFoundException ex) { 
-	            System.err.println("ERROR: No se encontró el archivo de eventos");
-	            procesandoEventos = false;
-	            return;
-	        }
+			procesandoEventos = true;
+			StringBuilder eventosLeidos = new StringBuilder();
+			boolean hayEventos = false;
 
-	        // 2. PROCESAR los eventos leídos
-	        if (hayEventos) {
-	            String[] eventos = eventosLeidos.toString().split("\n");
-	            for (String linea : eventos) {
-	                if (linea.startsWith("LINEA:")) {
-	                    mostrarAviso("Línea", "¡" + linea.substring(6) + " ha hecho LÍNEA!");
-	                    
-	                } else if (linea.startsWith("BINGO:")) {
-	                    mostrarAviso("Bingo", "¡" + linea.substring(6) + " ha hecho BINGO!");
-	                    newnumber.setEnabled(false);
-	                    try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA_BINGO_ESTADO))) {
-	                        pw.println("CONFIRMADA:" + linea.substring(6));
-	                    } catch (IOException ex) {
-	                        System.err.println("ERROR: no se pudo escribir bingo_estado.txt");
-	                    }
-	                    
-	                } else if (linea.startsWith("COMPROBANDO:")) {
-	                    String[] p = linea.split(":");
-	                    if (p.length >= 3) {
-	                        mostrarAviso("Comprobando", "¡" + p[1] + " ha hecho " + p[2] + "! Se está comprobando...");
-	                    }
-	                    
-	                } else if (linea.startsWith("FALLO:")) {
-	                    String[] p = linea.split(":");
-	                    if (p.length >= 3) {
-	                        mostrarAviso("Fallo", "¡" + p[1] + " ha fallado la pregunta de " + p[2] + "! El juego continúa.");
-	                    }
-	                    
-	                } else if (linea.startsWith("BLOQUEAR_BOTON")) {
-	                    SwingUtilities.invokeLater(() -> newnumber.setEnabled(false));
-	                    
-	                } else if (linea.startsWith("DESBLOQUEAR_BOTON")) {
-	                    SwingUtilities.invokeLater(() -> newnumber.setEnabled(true));
-	                }
-	                
-	                System.out.println("[DEBUG BOMBO] Evento procesado: " + linea);
-	            }
+			try (Scanner sc = new Scanner(f)) {
+				while (sc.hasNextLine()) {
+					String linea = sc.nextLine().trim();
+					if (linea.isEmpty())
+						continue;
+					hayEventos = true;
+					eventosLeidos.append(linea).append("\n");
+				}
+			} catch (FileNotFoundException ex) {
+				System.err.println("ERROR: No se encontró el archivo de eventos");
+				procesandoEventos = false;
+				return;
+			}
 
-	            // 3. ESPERAR antes de vaciar (usando Timer para no bloquear EDT)
-	            Timer vaciarTimer = new Timer(300, evt -> {
-	                try (PrintWriter pw = new PrintWriter(RUTA_EVENTOS)) { 
-	                    // Vaciar
-	                } catch (Exception ex) {
-	    	            System.err.println("[ERROR] " + ex.getMessage());
-	    	        }
-	                System.out.println("[DEBUG BOMBO] Archivo de eventos vaciado");
-	                procesandoEventos = false;
-	            });
-	            vaciarTimer.setRepeats(false);
-	            vaciarTimer.start();
-	            
-	        } else {
-	            procesandoEventos = false;
-	        }
-	    });
-	    timer.start();
+			if (hayEventos) {
+				String[] eventos = eventosLeidos.toString().split("\n");
+				for (String linea : eventos) {
+					if (linea.startsWith("LINEA:")) {
+						mostrarAviso("Línea", "¡" + linea.substring(6) + " ha hecho LÍNEA!");
+					} else if (linea.startsWith("BINGO:")) {
+						mostrarAviso("Bingo", "¡" + linea.substring(6) + " ha hecho BINGO!");
+						newnumber.setEnabled(false);
+						try (PrintWriter pw = new PrintWriter(new FileWriter(RUTA_BINGO_ESTADO))) {
+							pw.println("CONFIRMADA:" + linea.substring(6));
+						} catch (IOException ex) {
+							System.err.println("ERROR: no se pudo escribir bingo_estado.txt");
+						}
+					} else if (linea.startsWith("COMPROBANDO:")) {
+						String[] p = linea.split(":");
+						if (p.length >= 3) {
+							mostrarAviso("Comprobando", "¡" + p[1] + " ha hecho " + p[2] + "! Se está comprobando...");
+						}
+					} else if (linea.startsWith("FALLO:")) {
+						String[] p = linea.split(":");
+						if (p.length >= 3) {
+							mostrarAviso("Fallo", "¡" + p[1] + " ha fallado la pregunta de " + p[2] + "! El juego continúa.");
+						}
+					} else if (linea.startsWith("BLOQUEAR_BOTON")) {
+						SwingUtilities.invokeLater(() -> newnumber.setEnabled(false));
+					} else if (linea.startsWith("DESBLOQUEAR_BOTON")) {
+						SwingUtilities.invokeLater(() -> newnumber.setEnabled(true));
+					}
+				}
+
+				Timer vaciarTimer = new Timer(300, evt -> {
+					try (PrintWriter pw = new PrintWriter(RUTA_EVENTOS)) {
+					} catch (Exception ex) {
+						System.err.println("[ERROR] " + ex.getMessage());
+					}
+					procesandoEventos = false;
+				});
+				vaciarTimer.setRepeats(false);
+				vaciarTimer.start();
+			} else {
+				procesandoEventos = false;
+			}
+		});
+		timer.start();
 	}
 
-	private javax.swing.Timer timerAviso;   // campo de clase, reutilizable
+	private javax.swing.Timer timerAviso;
 
 	private void mostrarAviso(String titulo, String texto) {
 		SwingUtilities.invokeLater(() -> {
-			/* 1.  Cierra aviso anterior y para su Timer */
 			if (timerAviso != null) {
 				timerAviso.stop();
 			}
@@ -353,15 +340,13 @@ public class Bombo extends JFrame {
 				avisoActual.dispose();
 			}
 
-			/* 2.  Crea el nuevo aviso */
 			avisoActual = new JDialog(this, titulo, false);
 			avisoActual.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			avisoActual.add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
+			avisoActual.getContentPane().add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
 			avisoActual.setSize(400, 120);
 			avisoActual.setLocationRelativeTo(this);
 			avisoActual.setVisible(true);
 
-			/* 3.  Timer nuevo: 5 s y luego cierra */
 			timerAviso = new javax.swing.Timer(4000, e -> {
 				if (avisoActual != null && avisoActual.isDisplayable()) {
 					avisoActual.dispose();
@@ -372,5 +357,4 @@ public class Bombo extends JFrame {
 			timerAviso.start();
 		});
 	}
-
 }
