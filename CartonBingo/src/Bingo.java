@@ -30,6 +30,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import java.awt.Toolkit;
 
 public class Bingo extends JFrame {
 
@@ -257,6 +258,7 @@ public class Bingo extends JFrame {
 		lblNewLabel.setIcon(new ImageIcon(ruta_Carpeta + "/imagenes/bolaverde.png"));
 		lblNewLabel.setBounds(10, 85, 265, 250);
 		panel_1.add(lblNewLabel);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ruta_Carpeta + "/imagenes/bolamorada.png"));
 
 		pedirNombreJugador();
 		cargarPreguntas();
@@ -879,7 +881,7 @@ public class Bingo extends JFrame {
 
 			avisoActual = new JDialog(this, titulo, false);
 			avisoActual.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			avisoActual.add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
+			avisoActual.getContentPane().add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
 			avisoActual.setSize(400, 120);
 			avisoActual.setLocationRelativeTo(this);
 			avisoActual.setVisible(true);

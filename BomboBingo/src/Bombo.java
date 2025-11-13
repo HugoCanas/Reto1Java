@@ -22,6 +22,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import java.awt.Font;
 import java.awt.BorderLayout;
+import java.awt.Toolkit;
 
 public class Bombo extends JFrame {
 
@@ -142,6 +143,8 @@ public class Bombo extends JFrame {
 		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
 		lblNewLabel_1.setBounds(10, 11, 311, 63);
 		contentPane.add(lblNewLabel_1);
+		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(RUTA_CARPETA + "/imagenes/bolaverde.png"));
 
 		addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
@@ -339,7 +342,7 @@ public class Bombo extends JFrame {
 
 			avisoActual = new JDialog(this, titulo, false);
 			avisoActual.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			avisoActual.add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
+			avisoActual.getContentPane().add(new JLabel(texto, SwingConstants.CENTER), BorderLayout.CENTER);
 			avisoActual.setSize(400, 120);
 			avisoActual.setLocationRelativeTo(this);
 			avisoActual.setVisible(true);
