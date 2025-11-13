@@ -126,11 +126,11 @@ public class Bombo extends JFrame {
 		BolaAnterior.setBounds(0, 0, 100, 100);
 		AnteriorPane.add(BolaAnterior);
 
-		JLabel lblNewLabel = new JLabel("Bola Nueva");
-		lblNewLabel.setFont(new Font("Verdana", Font.BOLD, 20));
-		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(10, 11, 250, 24);
-		control.add(lblNewLabel);
+		JLabel lblBolaNueva = new JLabel("Bola Nueva");
+		lblBolaNueva.setFont(new Font("Verdana", Font.BOLD, 20));
+		lblBolaNueva.setHorizontalAlignment(SwingConstants.CENTER);
+		lblBolaNueva.setBounds(10, 11, 250, 24);
+		control.add(lblBolaNueva);
 
 		JLabel lblBolaAnterior = new JLabel("Bola Anterior");
 		lblBolaAnterior.setFont(new Font("Verdana", Font.BOLD, 12));
@@ -138,11 +138,11 @@ public class Bombo extends JFrame {
 		lblBolaAnterior.setBounds(241, 298, 100, 14);
 		control.add(lblBolaAnterior);
 
-		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
-		lblNewLabel_1.setForeground(Color.BLACK);
-		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
-		lblNewLabel_1.setBounds(10, 11, 311, 63);
-		contentPane.add(lblNewLabel_1);
+		JLabel lblAlmingo = new JLabel("ALMINGO");
+		lblAlmingo.setForeground(Color.BLACK);
+		lblAlmingo.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
+		lblAlmingo.setBounds(10, 11, 311, 63);
+		contentPane.add(lblAlmingo);
 		
 		setIconImage(Toolkit.getDefaultToolkit().getImage(RUTA_CARPETA + "/imagenes/bolaverde.png"));
 

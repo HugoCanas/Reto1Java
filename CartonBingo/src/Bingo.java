@@ -82,7 +82,7 @@ public class Bingo extends JFrame {
 	private String ruta_Eventos;
 	private String ruta_Nombres;
 	private long ultimaModificacionBombo = 0L;
-	private JPanel panel_1;
+	private JPanel panelBola;
 	private Color colorOriginal;
 	private JDialog avisoActual;
 	private String[][] preguntasRespuestas;
@@ -111,20 +111,20 @@ public class Bingo extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
-		JLabel lblNewLabel_1 = new JLabel("ALMINGO");
-		lblNewLabel_1.setForeground(new Color(0, 0, 0));
-		lblNewLabel_1.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
-		lblNewLabel_1.setBounds(10, 0, 311, 63);
-		contentPane.add(lblNewLabel_1);
+		JLabel lblAlmingo = new JLabel("ALMINGO");
+		lblAlmingo.setForeground(new Color(0, 0, 0));
+		lblAlmingo.setFont(new Font("Mongolian Baiti", Font.BOLD, 54));
+		lblAlmingo.setBounds(10, 0, 311, 63);
+		contentPane.add(lblAlmingo);
 
-		JPanel panel = new JPanel();
-		panel.setBackground(new Color(192, 192, 192));
-		panel.setBounds(10, 60, 619, 407);
-		contentPane.add(panel);
-		panel.setLayout(new GridLayout(0, 5, 0, 0));
+		JPanel panelBotones = new JPanel();
+		panelBotones.setBackground(new Color(192, 192, 192));
+		panelBotones.setBounds(10, 60, 619, 407);
+		contentPane.add(panelBotones);
+		panelBotones.setLayout(new GridLayout(0, 5, 0, 0));
 
 		btn1 = new JButton("New button");
-		panel.add(btn1);
+		panelBotones.add(btn1);
 		btn1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
@@ -133,113 +133,113 @@ public class Bingo extends JFrame {
 		colorOriginal = btn1.getBackground();
 
 		btn2 = new JButton("New button");
-		panel.add(btn2);
+		panelBotones.add(btn2);
 		btn2.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn3 = new JButton("New button");
-		panel.add(btn3);
+		panelBotones.add(btn3);
 		btn3.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn4 = new JButton("New button");
-		panel.add(btn4);
+		panelBotones.add(btn4);
 		btn4.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn5 = new JButton("New button");
-		panel.add(btn5);
+		panelBotones.add(btn5);
 		btn5.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn6 = new JButton("New button");
-		panel.add(btn6);
+		panelBotones.add(btn6);
 		btn6.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn7 = new JButton("New button");
-		panel.add(btn7);
+		panelBotones.add(btn7);
 		btn7.setForeground(new Color(0, 0, 0));
 		btn7.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn8 = new JButton("New button");
-		panel.add(btn8);
+		panelBotones.add(btn8);
 		btn8.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn9 = new JButton("New button");
-		panel.add(btn9);
+		panelBotones.add(btn9);
 		btn9.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn10 = new JButton("New button");
-		panel.add(btn10);
+		panelBotones.add(btn10);
 		btn10.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn11 = new JButton("New button");
-		panel.add(btn11);
+		panelBotones.add(btn11);
 		btn11.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn12 = new JButton("New button");
-		panel.add(btn12);
+		panelBotones.add(btn12);
 		btn12.setForeground(new Color(0, 0, 0));
 		btn12.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn13 = new JButton("New button");
-		panel.add(btn13);
+		panelBotones.add(btn13);
 		btn13.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn14 = new JButton("New button");
-		panel.add(btn14);
+		panelBotones.add(btn14);
 		btn14.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn15 = new JButton("New button");
-		panel.add(btn15);
+		panelBotones.add(btn15);
 		btn15.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn16 = new JButton("New button");
-		panel.add(btn16);
+		panelBotones.add(btn16);
 		btn16.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn17 = new JButton("New button");
-		panel.add(btn17);
+		panelBotones.add(btn17);
 		btn17.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn18 = new JButton("New button");
-		panel.add(btn18);
+		panelBotones.add(btn18);
 		btn18.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn19 = new JButton("New button");
-		panel.add(btn19);
+		panelBotones.add(btn19);
 		btn19.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn20 = new JButton("New button");
-		panel.add(btn20);
+		panelBotones.add(btn20);
 		btn20.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn21 = new JButton("New button");
-		panel.add(btn21);
+		panelBotones.add(btn21);
 		btn21.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn22 = new JButton("New button");
-		panel.add(btn22);
+		panelBotones.add(btn22);
 		btn22.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn23 = new JButton("New button");
-		panel.add(btn23);
+		panelBotones.add(btn23);
 		btn23.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn24 = new JButton("New button");
-		panel.add(btn24);
+		panelBotones.add(btn24);
 		btn24.setFont(new Font("Tahoma", Font.BOLD, 20));
 
 		btn25 = new JButton("New button");
-		panel.add(btn25);
+		panelBotones.add(btn25);
 		btn25.setFont(new Font("Tahoma", Font.BOLD, 20));
 
-		panel_1 = new JPanel();
-		panel_1.setBackground(new Color(192, 192, 192));
-		panel_1.setBounds(639, 11, 285, 456);
-		contentPane.add(panel_1);
-		panel_1.setLayout(null);
+		panelBola = new JPanel();
+		panelBola.setBackground(new Color(192, 192, 192));
+		panelBola.setBounds(639, 11, 285, 456);
+		contentPane.add(panelBola);
+		panelBola.setLayout(null);
 
 		lblNumeroActual = new JLabel("--");
 		lblNumeroActual.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNumeroActual.setBounds(10, 85, 246, 229);
-		panel_1.add(lblNumeroActual);
+		panelBola.add(lblNumeroActual);
 		lblNumeroActual.setFont(new Font("Verdana", Font.BOLD, 50));
 
 		addWindowListener(new WindowAdapter() {
@@ -254,10 +254,10 @@ public class Bingo extends JFrame {
 
 		pedirIPServidor();
 
-		JLabel lblNewLabel = new JLabel("");
-		lblNewLabel.setIcon(new ImageIcon(ruta_Carpeta + "/imagenes/bolaverde.png"));
-		lblNewLabel.setBounds(10, 85, 265, 250);
-		panel_1.add(lblNewLabel);
+		JLabel lblNumero = new JLabel("");
+		lblNumero.setIcon(new ImageIcon(ruta_Carpeta + "/imagenes/bolaverde.png"));
+		lblNumero.setBounds(10, 85, 265, 250);
+		panelBola.add(lblNumero);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ruta_Carpeta + "/imagenes/bolamorada.png"));
 
 		pedirNombreJugador();
