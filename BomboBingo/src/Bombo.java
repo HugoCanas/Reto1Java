@@ -198,14 +198,12 @@ public class Bombo extends JFrame {
 		try (PrintWriter pw = new PrintWriter(new File(RUTA_BOMBO))) {
 			pw.println("--");
 			pw.println("");
-			System.out.println("[DEBUG] Archivo bombo_bingo.txt vaciado al cerrar.");
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo vaciar el archivo del bombo. Detalle: " + ex.getMessage());
 		}
 
 		try (PrintWriter pw = new PrintWriter(new File(RUTA_BINGO_ESTADO))) {
 			pw.print("");
-			System.out.println("[DEBUG] bingo_estado.txt vaciado al cerrar.");
 		} catch (FileNotFoundException ex) {
 			System.err.println("ERROR: No se pudo vaciar bingo_estado.txt. Detalle: " + ex.getMessage());
 		}
@@ -275,7 +273,6 @@ public class Bombo extends JFrame {
 						continue;
 					hayEventos = true;
 					eventosLeidos.append(linea).append("\n");
-					System.out.println("[DEBUG BOMBO] Leyendo evento: " + linea);
 				}
 			} catch (FileNotFoundException ex) {
 				System.err.println("ERROR: No se encontró el archivo de eventos");
@@ -311,7 +308,6 @@ public class Bombo extends JFrame {
 					} else if (linea.startsWith("DESBLOQUEAR_BOTON")) {
 						SwingUtilities.invokeLater(() -> newnumber.setEnabled(true));
 					}
-					System.out.println("[DEBUG BOMBO] Evento procesado: " + linea);
 				}
 
 				Timer vaciarTimer = new Timer(300, evt -> {
@@ -319,7 +315,6 @@ public class Bombo extends JFrame {
 					} catch (Exception ex) {
 						System.err.println("[ERROR] " + ex.getMessage());
 					}
-					System.out.println("[DEBUG BOMBO] Archivo de eventos vaciado");
 					procesandoEventos = false;
 				});
 				vaciarTimer.setRepeats(false);

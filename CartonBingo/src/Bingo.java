@@ -467,7 +467,6 @@ public class Bingo extends JFrame {
 		}
 
 		if (!valido) {
-			System.out.println("[DEBUG] " + tipo + " no válida - números no han salido");
 			mostrarAviso(tipo + " no válida",
 					"¡" + tipo + " no válida! Algunos números aún no han salido del bombo.");
 			desmarcarNumerosNoValidos();
@@ -489,7 +488,6 @@ public class Bingo extends JFrame {
 
 		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Eventos, true))) {
 			pw.println("COMPROBANDO:" + nombreJugador + ":" + tipo);
-			System.out.println("[DEBUG] Escrito: COMPROBANDO:" + nombreJugador + ":" + tipo);
 		} catch (IOException e) {
 			System.err.println("[ERROR] No se pudo escribir el evento: " + e.getMessage());
 		}
@@ -570,11 +568,9 @@ public class Bingo extends JFrame {
 					setEstadoLinea("CONFIRMADA:" + nombreJugador);
 					lineaGlobalConfirmada = true;
 					mostrarAviso("Línea validada", "¡Acertaste! LÍNEA válida.");
-					System.out.println("[DEBUG] Línea confirmada globalmente por " + nombreJugador);
 				} else if (tipo.equals("BINGO")) {
 					mostrarAviso("¡BINGO GANADOR!", "¡Felicidades! Has ganado el BINGO.");
 					desactivarBotones();
-					System.out.println("[DEBUG] Bingo confirmado globalmente por " + nombreJugador);
 				}
 			} else {
 				pw.println("FALLO:" + nombreJugador + ":" + tipo);
@@ -585,7 +581,6 @@ public class Bingo extends JFrame {
 							"¡Respuesta incorrecta! Esta línea ya no es válida, intenta con otra.");
 					if (filaActualLinea >= 0) {
 						filaFallida[filaActualLinea] = true;
-						System.out.println("[DEBUG] Fila " + filaActualLinea + " marcada como fallida para " + nombreJugador);
 					}
 					lineaEncontrada = false;
 					filaActualLinea = -1;
@@ -654,7 +649,6 @@ public class Bingo extends JFrame {
 			}
 
 			if (filaCompleta) {
-				System.out.println("[DEBUG] Fila " + fila + " detectada como línea");
 				return fila;
 			}
 		}
@@ -762,8 +756,6 @@ public class Bingo extends JFrame {
 					mostrarAviso("Línea confirmada",
 							"¡" + ganador + " ha conseguido LÍNEA!\nYa no se pueden hacer más líneas.");
 				}
-
-				System.out.println("[DEBUG] Línea global confirmada. Jugador: " + nombreJugador + " ya no puede hacer líneas.");
 			}
 		});
 		timer.start();
@@ -780,7 +772,6 @@ public class Bingo extends JFrame {
 							"¡" + ganador + " ha hecho BINGO!\nEl juego ha finalizado.");
 				}
 				desactivarBotones();
-				System.out.println("[DEBUG] Bingo global confirmado. Jugador: " + nombreJugador);
 			}
 		});
 		timer.start();
@@ -808,8 +799,6 @@ public class Bingo extends JFrame {
 					String linea = sc.nextLine().trim();
 					if (linea.isEmpty())
 						continue;
-
-					System.out.println("[DEBUG] " + nombreJugador + " leyó: " + linea);
 
 					if (linea.startsWith("COMPROBANDO:")) {
 						String[] p = linea.split(":");
@@ -872,7 +861,6 @@ public class Bingo extends JFrame {
 	private void setEstadoLinea(String estado) {
 		try (PrintWriter pw = new PrintWriter(new FileWriter(ruta_Linea))) {
 			pw.println(estado);
-			System.out.println("[DEBUG] Estado de línea actualizado: " + estado);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
